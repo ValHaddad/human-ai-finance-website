@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#003B5C"/>
+  <text x="32" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">H<tspan fill="#FFD100">x</tspan>AI</text>
+  <rect x="12" y="38" width="40" height="2" rx="1" fill="#FFD100"/>
+  <text x="32" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#DAEBFE" text-anchor="middle" dominant-baseline="central">FINANCE</text>
+</svg>
