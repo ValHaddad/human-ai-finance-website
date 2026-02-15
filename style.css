@@ -333,7 +333,7 @@ section h3 {
 /* Contact */
 .contact-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 24px;
     margin-top: 8px;
 }
