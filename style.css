@@ -291,6 +291,28 @@ section h3 {
     text-align: center;
 }
 
+.pdf-download {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.pdf-download a {
+    color: var(--color-text-muted);
+    text-decoration: underline;
+}
+
+.pdf-download a:hover {
+    color: var(--color-primary);
+}
+
+.alt-submit {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
 /* Submit */
 .submit-info {
     background: #fff;
