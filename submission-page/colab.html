@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Human x AI Finance 2026 — Co-Author Survey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- jsPsych v8 core -->
+  <script src="https://unpkg.com/jspsych@8.2.3/dist/index.browser.min.js"></script>
+  <link  href="https://unpkg.com/jspsych@8.2.3/css/jspsych.css" rel="stylesheet" />
+
+  <!-- Plugins -->
+  <script src="https://unpkg.com/@jspsych/plugin-survey@4.0.0/dist/index.browser.min.js"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0/dist/index.browser.min.js"></script>
+  <link  href="https://unpkg.com/@jspsych/plugin-survey@4.0.0/css/survey.css" rel="stylesheet" />
+
+  <!--
+    Single stylesheet — loaded AFTER survey.css so overrides win specificity.
+    All SurveyJS customisations live here in one place.
+  -->
+  <style>
+    /* ── Theme tokens (matched to website style.css) ──── */
+    :root {
+      --brand:       #2774AE;          /* UCLA Blue */
+      --brand-dark:  #003B5C;          /* UCLA Darkest Blue */
+      --brand-mid:   #005587;          /* UCLA Darker Blue */
+      --accent:      #FFD100;          /* UCLA Gold */
+      --accent-dark: #E6BC00;          /* Gold hover */
+      --text:        #1a1a1a;
+      --text-muted:  #555;
+      --radius:      6px;
+      --card-max:    700px;
+      --font:        'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── Base ──────────────────────────────────────────── */
+    body { margin: 0; padding: 0; font-family: var(--font); color: var(--text); line-height: 1.7; font-size: 17px; }
+    .jspsych-display-element { font-size: 17px; line-height: 1.7; }
+    .jspsych-content-wrapper { text-align: center; }
+    .jspsych-content { width: 100%; }
+
+    /* ── jsPsych button (thank-you page) ───────────────── */
+    .jspsych-btn {
+      background: var(--accent) !important; color: var(--brand-dark) !important;
+      border: none !important; border-radius: var(--radius) !important;
+      padding: 12px 32px !important; font: 700 1rem var(--font) !important;
+      cursor: pointer; transition: background 0.2s, transform 0.1s;
+    }
+    .jspsych-btn:hover { background: var(--accent-dark) !important; transform: translateY(-1px); }
+
+    /* ── SurveyJS: layout ──────────────────────────────── */
+    .sd-body.sd-body--static {
+      max-width: 1100px !important;
+      padding: 24px 24px 32px !important;
+    }
+    .sd-body__page, .sd-page, .sd-row, .sd-row > div,
+    .sd-element, .sd-question, .sd-element--complex,
+    .sd-question--table { max-width: 100% !important; }
+    .sd-question__content { overflow-x: auto !important; max-width: 100% !important; padding-top: 6px !important; }
+
+    /* ── SurveyJS: section header ──────────────────────── */
+    .sd-header { padding-bottom: 12px !important; }
+    .sd-header__text { text-align: center !important; }
+    .sd-header__text h3 { font-family: var(--font); color: var(--brand); font-weight: 700; }
+    .sd-description {
+      text-align: center !important;
+      max-width: var(--card-max); margin: 0 auto !important;
+    }
+
+    /* ── SurveyJS: buttons ─────────────────────────────── */
+    .sd-btn, .sd-navigation__complete-btn, .sd-btn--action {
+      background: var(--accent) !important; color: var(--brand-dark) !important;
+      border-radius: var(--radius) !important;
+      font-weight: 700 !important; padding: 12px 32px !important;
+      font-size: 1rem !important; transition: background 0.2s, transform 0.1s;
+    }
+    .sd-btn:hover, .sd-navigation__complete-btn:hover { background: var(--accent-dark) !important; transform: translateY(-1px); }
+    .sd-action-bar { justify-content: center !important; }
+
+    /* ── SurveyJS: question cards ──────────────────────── */
+    .sd-element--with-frame {
+      max-width: var(--card-max) !important;
+      margin-left: auto !important; margin-right: auto !important;
+      padding: 18px 22px !important;
+    }
+    /* Radio-grid matrices (many columns) go wide */
+    .sd-element--with-frame.sd-question--table { max-width: 100% !important; }
+    /* Dynamic input tables (authors, tools) stay card-width */
+    .sd-element--with-frame.sd-question--table:has(.sd-matrixdynamic) {
+      max-width: var(--card-max) !important;
+    }
+    .sd-element--complex.sd-element--with-frame > .sd-element__header {
+      padding: 12px 0 !important; margin-bottom: 8px !important;
+    }
+    .sd-row { margin-top: 10px !important; }
+    .sd-page > .sd-row:first-child { margin-top: 0 !important; }
+
+    /* ── SurveyJS: radio / checkbox lists ──────────────── */
+    .sd-selectbase { gap: 2px !important; }
+    .sd-item { padding: 5px 0 !important; }
+
+    /* ── SurveyJS: matrix tables ───────────────────────── */
+    .sd-table { width: 100% !important; table-layout: auto !important; }
+    .sd-matrix__cell--header {
+      font-size: 0.78em !important; white-space: normal !important;
+      word-break: break-word !important; text-align: center !important;
+      padding: 6px 4px !important;
+    }
+    .sd-matrix__cell { padding: 8px 4px !important; text-align: center !important; }
+    .sd-matrix__cell:first-child {
+      min-width: 150px !important; max-width: 200px !important;
+      text-align: left !important; font-size: 0.88em !important;
+      padding-left: 12px !important;
+    }
+
+    /* ── Consent header ────────────────────────────────── */
+    .consent-header {
+      max-width: 680px; margin: 0 auto 8px; text-align: left; line-height: 1.5;
+    }
+    .consent-header .ch-center { text-align: center; margin-bottom: 24px; }
+    .consent-header .ucla-seal {
+      width: 180px; height: 180px; display: block; margin: 0 auto 12px;
+    }
+    .consent-header h1 { font-size: 1.55em; margin: 0 0 4px; letter-spacing: -0.01em; }
+    .consent-header h2 { font-size: 1.1em; font-weight: 600; margin: 0; color: var(--brand-dark); }
+    .consent-header p { margin: 12px 0; }
+    .consent-header a { color: var(--brand); }
+    .consent-header .paper-context {
+      background: #f0f6fb; border-left: 4px solid var(--brand);
+      padding: 12px 16px; margin: 16px 0; border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .consent-header .paper-context strong { color: var(--brand-dark); }
+
+    /* ── Consent checkbox: move required * next to label ── */
+    [data-name="consent_agree"] .sd-question__header { display: none !important; }
+    [data-name="consent_agree"] .sd-selectbase__label::after {
+      content: " *"; color: #e60a3e; font-weight: 600;
+    }
+
+    /* ── Thank-you page ────────────────────────────────── */
+    .debrief {
+      max-width: 640px; margin: 0 auto; text-align: left;
+      line-height: 1.65; padding: 40px 24px; font-family: var(--font);
+    }
+    .debrief h2 { text-align: center; font-size: 1.6em; margin-bottom: 24px; }
+    .debrief .footer {
+      margin-top: 36px; padding-top: 20px;
+      border-top: 3px solid var(--accent); color: var(--text-muted); font-size: 0.92em;
+    }
+    .debrief a { color: var(--brand); }
+  </style>
+</head>
+
+<body></body>
+
+<script>
+/**
+ * Human × AI Finance 2026 — Co-Author Survey
+ * Built with jsPsych v8 + @jspsych/plugin-survey (SurveyJS)
+ *
+ * This is a shorter survey sent to non-submitting co-authors.
+ * It focuses on individual AI usage and team coordination.
+ *
+ * Structure:
+ *   0. Consent
+ *   1. About You
+ *   2. AI Tools & Usage
+ *   3. AI's Role in Your Research
+ *   4. Collaboration & AI Coordination
+ *   5. Thank You
+ *
+ * URL params:
+ *   ?paper=TITLE&submitter=NAME  — displayed in consent header
+ *   ?demo                        — skip required-field validation
+ */
+
+// ─── URL params ─────────────────────────────────────────
+const PARAMS = new URLSearchParams(window.location.search);
+const DEMO       = PARAMS.has("demo");
+const PAPER_TITLE = decodeURIComponent(PARAMS.get("paper")  || "");
+const SUBMITTER   = decodeURIComponent(PARAMS.get("submitter") || "");
+
+// ─── Shared constants ────────────────────────────────────
+
+/** Research tasks used in role matrix (Section 3). */
+const RESEARCH_TASKS = [
+  { value: "main_idea",       text: "Coming up with the main idea or contribution" },
+  { value: "lit_review",      text: "Literature review" },
+  { value: "data_collection", text: "Data collection or processing" },
+  { value: "data_analysis",   text: "Data analysis or coding" },
+  { value: "theorem_proofs",  text: "Theorem generation and proofs" },
+  { value: "numerical_sim",   text: "Numerical analysis and simulation" },
+  { value: "writing_editing", text: "Writing and editing" }
+];
+
+
+// ─── jsPsych init ────────────────────────────────────────
+
+const jsPsych = initJsPsych({
+  show_progress_bar: false,
+  on_finish() { jsPsych.data.displayData("json"); }
+});
+
+
+// ─── 0. Consent ──────────────────────────────────────────
+// Data keys: consent_agree
+
+const paperContextHtml = (PAPER_TITLE || SUBMITTER)
+  ? '<div class="paper-context">' +
+      (PAPER_TITLE ? '<p><strong>Paper:</strong> ' + PAPER_TITLE + '</p>' : '') +
+      (SUBMITTER   ? '<p><strong>Submitted by:</strong> ' + SUBMITTER + '</p>' : '') +
+    '</div>'
+  : '';
+
+const consent = {
+  type: jsPsychSurvey,
+  survey_json: {
+    showQuestionNumbers: "off",
+    completeText: "Begin Survey",
+    pages: [{
+      elements: [
+        {
+          type: "html", name: "consent_info",
+          html:
+            '<div class="consent-header">' +
+              '<div class="ch-center">' +
+                '<img src="uclaSeal.jpeg" alt="UCLA Seal" class="ucla-seal" />' +
+                '<h1>Human \u00d7 AI Finance 2026</h1>' +
+                '<h2>UCLA Anderson School of Management<br>CO-AUTHOR SURVEY</h2>' +
+              '</div>' +
+              paperContextHtml +
+              '<p>Your co-author has submitted a paper to Human \u00d7 AI Finance 2026. ' +
+                'This short survey collects information about your individual experience ' +
+                'using AI and how your team coordinated AI use. It should take ' +
+                'approximately <strong>5 minutes</strong>.</p>' +
+              '<p>Your survey responses may be used for academic research on ' +
+                'AI-assisted writing and collaborative workflows. Only anonymized and ' +
+                'aggregate statistics will be published. No individual author will be ' +
+                'identified in any research output without separate explicit permission.</p>' +
+              '<p>Your responses to questions beyond the content of the paper ' +
+                '(e.g., about your background, workflow, or AI usage) will <strong>not</strong> ' +
+                'affect the evaluation or score of the paper in any way.</p>' +
+              '<p>You may withdraw your consent at any time by emailing ' +
+                '<a href="mailto:vhaddad+humanxai@g.ucla.edu">vhaddad+humanxai@g.ucla.edu</a>. ' +
+                'The conference website ' +
+                '(<a href="https://humanxaifinance.org" target="_blank">humanxaifinance.org</a>) ' +
+                'provides full details.</p>' +
+            '</div>'
+        },
+        {
+          type: "checkbox", name: "consent_agree",
+          title: " ",
+          isRequired: true,
+          choices: [
+            "I have read and agree to the terms outlined above."
+          ],
+          validators: [{ type: "answercount", minCount: 1, text: "You must agree to continue." }]
+        }
+      ]
+    }]
+  }
+};
+
+
+// ─── 1. About You ────────────────────────────────────────
+// Data keys: name, email, occupation_title, affiliation,
+//   primary_field
+
+const aboutYou = {
+  type: jsPsychSurvey,
+  survey_json: {
+    title: "About You",
+    description: "Your responses will not affect the paper\u2019s evaluation or score.",
+    showQuestionNumbers: "off",
+    completeText: "Next",
+    pages: [{
+      elements: [
+        { type: "text", name: "name", title: "Full name", isRequired: true },
+        {
+          type: "text", name: "email", title: "Email address",
+          inputType: "email", isRequired: true,
+          validators: [{ type: "email" }]
+        },
+        {
+          type: "text", name: "occupation_title",
+          title: "Occupation and title (e.g., Assistant Professor, PhD Student, Research Analyst)",
+          isRequired: true
+        },
+        { type: "text", name: "affiliation", title: "Institutional affiliation", isRequired: true },
+        {
+          type: "dropdown", name: "primary_field",
+          title: "Field of primary expertise", isRequired: true,
+          choices: [
+            "Finance", "Economics", "Computer Science",
+            "Statistics / Data Science", "Accounting", "Management"
+          ],
+          showOtherItem: true, otherText: "Other"
+        },
+      ]
+    }]
+  }
+};
+
+
+// ─── 2. AI Tools & Usage ─────────────────────────────────
+// Data keys: ai_tools_used (array),
+//   personal_hours, team_hours, counterfactual_hours
+
+const aiTools = {
+  type: jsPsychSurvey,
+  survey_json: {
+    title: "AI Tools You Used",
+    description: "Your responses will not affect the paper\u2019s evaluation or score. " +
+                 "Tell us what AI tools you personally used and your level of reliance on each.",
+    showQuestionNumbers: "off",
+    completeText: "Next",
+    pages: [{
+      elements: [
+        {
+          type: "matrixdynamic", name: "ai_tools_used",
+          title: "List each AI tool or model you used and your level of reliance on each.",
+          isRequired: true,
+          columns: [
+            {
+              name: "tool_name",
+              title: "Tool / Model (e.g., ChatGPT-4o, Claude Code, Copilot, Refine.ink, etc.)",
+              cellType: "text", isRequired: true
+            },
+            {
+              name: "usage_level", title: "Level of reliance", cellType: "dropdown",
+              choices: [
+                { value: 1, text: "1 \u2013 Minimal" },
+                { value: 2, text: "2 \u2013 Light" },
+                { value: 3, text: "3 \u2013 Moderate" },
+                { value: 4, text: "4 \u2013 Heavy" },
+                { value: 5, text: "5 \u2013 Primary tool" }
+              ]
+            }
+          ],
+          rowCount: 1,
+          addRowText: "Add Tool",
+          removeRowText: "Remove"
+        },
+        {
+          type: "radiogroup", name: "personal_hours",
+          title: "Approximately how many hours did you personally spend working on this paper (including time spent using AI)?",
+          isRequired: true,
+          choices: [
+            { value: "<10",   text: "Less than 10 hours" },
+            { value: "10-20", text: "10\u201320 hours" },
+            { value: "20-40", text: "20\u201340 hours" },
+            { value: "40-60", text: "40\u201360 hours" },
+            { value: "60-80", text: "60\u201380 hours" },
+            { value: "80+",   text: "More than 80 hours" }
+          ]
+        },
+        {
+          type: "radiogroup", name: "team_hours",
+          title: "Approximately how many total hours did your entire team spend on this paper (all co-authors combined, including time spent using AI)?",
+          isRequired: true,
+          choices: [
+            { value: "<10",   text: "Less than 10 hours" },
+            { value: "10-40", text: "10\u201340 hours" },
+            { value: "40-80", text: "40\u201380 hours" },
+            { value: "80-160", text: "80\u2013160 hours" },
+            { value: "160-320", text: "160\u2013320 hours" },
+            { value: "320+",   text: "More than 320 hours" }
+          ]
+        },
+        {
+          type: "radiogroup", name: "counterfactual_hours",
+          title: "Without AI, how long would this paper have taken you and your collaborators to produce at a comparable quality level?",
+          isRequired: true,
+          choices: [
+            { value: "not_possible", text: "I could not have produced this paper without AI" },
+            { value: "2-4x",         text: "2\u20134\u00d7 longer" },
+            { value: "4-8x",         text: "4\u20138\u00d7 longer" },
+            { value: "8x+",          text: "More than 8\u00d7 longer" },
+            { value: "same",          text: "About the same amount of time" }
+          ]
+        }
+      ]
+    }]
+  }
+};
+
+
+// ─── 3. AI's Role in Your Research ───────────────────────
+// Data keys: ai_role_by_task (matrix)
+
+const aiContribution = {
+  type: jsPsychSurvey,
+  survey_json: {
+    title: "AI\u2019s Role in Your Research",
+    description: "Your responses will not affect the paper\u2019s evaluation or score. " +
+                 "For each research task, tell us what role AI played in your own work. " +
+                 "Check \u201cNot relevant\u201d if a task didn\u2019t apply to you.",
+    showQuestionNumbers: "off",
+    completeText: "Next",
+    pages: [{
+      elements: [
+        {
+          type: "matrix", name: "ai_role_by_task",
+          title: "For each task, what role did AI play?",
+          isRequired: true,
+          columns: [
+            { value: "not_relevant",    text: "Not relevant" },
+            { value: "tool",            text: "Tool (you directed everything)" },
+            { value: "assistant",       text: "Research assistant (delegated tasks, reviewed output)" },
+            { value: "thought_partner", text: "Thought partner (back-and-forth collaboration)" },
+            { value: "primary",         text: "Primary contributor (AI led, you guided)" },
+            { value: "editor",          text: "Editor (AI provided feedback or corrections)" }
+          ],
+          rows: RESEARCH_TASKS
+        }
+      ]
+    }]
+  }
+};
+
+
+// ─── 4. Collaboration & AI Coordination ──────────────────
+// Data keys: ai_coordination, your_ai_role,
+//   coauthor_ai_discussion, workflow_description
+
+const collaboration = {
+  type: jsPsychSurvey,
+  survey_json: {
+    title: "Collaboration & AI Coordination",
+    description: "Your responses will not affect the paper\u2019s evaluation or score. " +
+                 "Help us understand how your team coordinated AI use.",
+    showQuestionNumbers: "off",
+    completeText: "Submit",
+    pages: [{
+      elements: [
+        {
+          type: "radiogroup", name: "ai_coordination",
+          title: "How did your team coordinate AI use across co-authors?",
+          isRequired: true,
+          choices: [
+            { value: "independent",    text: "Independent use \u2014 each author used AI separately" },
+            { value: "one_led",        text: "One co-author led AI use for the team" },
+            { value: "joint",          text: "Coordinated / joint use \u2014 shared prompts, reviewed each other\u2019s AI output" },
+            { value: "mixed",          text: "Mixed approach" }
+          ],
+          showOtherItem: true, otherText: "Other"
+        },
+        {
+          type: "radiogroup", name: "your_ai_role",
+          title: "Which best describes your role in using AI for this paper?",
+          isRequired: true,
+          choices: [
+            { value: "primary_user",   text: "I was the primary AI user" },
+            { value: "independent",    text: "I used AI for my portions independently" },
+            { value: "reviewer",       text: "I mostly reviewed AI output produced by others" },
+            { value: "no_direct_use",  text: "I did not use AI directly" }
+          ],
+          showOtherItem: true, otherText: "Other"
+        },
+        {
+          type: "rating", name: "coauthor_ai_discussion",
+          title: "How much did you discuss AI strategies with your co-authors?",
+          isRequired: true,
+          rateMin: 1, rateMax: 7,
+          minRateDescription: "Not at all", maxRateDescription: "Extensively"
+        },
+        {
+          type: "comment", name: "workflow_description",
+          title: "Briefly describe how you and your co-authors divided the work and coordinated AI use. " +
+                 "What worked well? What was challenging?",
+          isRequired: false, rows: 5,
+          placeholder: "For example: My co-author handled data analysis with Claude Code while I focused on " +
+                       "writing and used ChatGPT for drafting sections..."
+        }
+      ]
+    }]
+  }
+};
+
+
+// ─── 5. Thank You ────────────────────────────────────────
+
+const thankYou = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div class="debrief">
+      <h2>Thank You!</h2>
+      <p>We have received your responses. Thank you for taking the time to
+         complete this co-author survey.</p>
+      <div class="footer">
+        <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
+        <p>Questions? Contact
+           <a href="mailto:vhaddad+humanxai@g.ucla.edu">vhaddad+humanxai@g.ucla.edu</a></p>
+      </div>
+    </div>
+  `,
+  choices: ["Close"]
+};
+
+
+// ─── Timeline ────────────────────────────────────────────
+
+const timeline = [
+  consent,          // 0
+  aboutYou,         // 1
+  aiTools,          // 2
+  aiContribution,   // 3
+  collaboration,    // 4
+  thankYou          // 5
+];
+
+// ─── Demo mode: strip required flags ─────────────────────
+if (DEMO) {
+  console.log("%c DEMO MODE — all fields optional ", "background:#2774AE;color:#fff;padding:2px 6px;border-radius:3px;");
+  function stripRequired(obj) {
+    if (Array.isArray(obj)) { obj.forEach(stripRequired); return; }
+    if (obj && typeof obj === "object") {
+      delete obj.isRequired;
+      delete obj.validators;
+      Object.values(obj).forEach(stripRequired);
+    }
+  }
+  timeline.forEach(t => { if (t.survey_json) stripRequired(t.survey_json); });
+}
+
+jsPsych.run(timeline);
+</script>
+</html>
