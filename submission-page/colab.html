@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Human x AI Finance 2026 — Co-Author Survey</title>
+  <title>Co-Author Survey — Human \u00d7 AI Finance 2026</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- jsPsych v8 core -->
@@ -117,12 +117,16 @@
     .consent-header {
       max-width: 680px; margin: 0 auto 8px; text-align: left; line-height: 1.5;
     }
-    .consent-header .ch-center { text-align: center; margin-bottom: 24px; }
-    .consent-header .ucla-seal {
-      width: 180px; height: 180px; display: block; margin: 0 auto 12px;
+    .consent-header .ch-center {
+      text-align: center; margin-bottom: 24px;
+      background: linear-gradient(160deg, var(--brand-dark) 0%, var(--brand-mid) 40%, var(--brand) 100%);
+      padding: 32px 24px 24px; border-radius: var(--radius);
     }
-    .consent-header h1 { font-size: 1.55em; margin: 0 0 4px; letter-spacing: -0.01em; }
-    .consent-header h2 { font-size: 1.1em; font-weight: 600; margin: 0; color: var(--brand-dark); }
+    .consent-header .ucla-logo {
+      height: 48px; width: auto; display: block; margin: 0 auto 16px;
+    }
+    .consent-header h1 { font-size: 1.55em; margin: 0 0 4px; letter-spacing: -0.01em; color: #fff; }
+    .consent-header h2 { font-size: 1.1em; font-weight: 600; margin: 0; color: rgba(255,255,255,0.9); }
     .consent-header p { margin: 12px 0; }
     .consent-header a { color: var(--brand); }
     .consent-header .paper-context {
@@ -131,10 +135,20 @@
     }
     .consent-header .paper-context strong { color: var(--brand-dark); }
 
-    /* ── Consent checkbox: move required * next to label ── */
+    /* ── Consent checkboxes ─────────────────────────────── */
     [data-name="consent_agree"] .sd-question__header { display: none !important; }
     [data-name="consent_agree"] .sd-selectbase__label::after {
       content: " *"; color: #e60a3e; font-weight: 600;
+    }
+    [data-name="publication_consent"] .sd-question__header { display: none !important; }
+
+    /* ── "Not used for review" disclaimer banner ──────── */
+    .review-disclaimer {
+      background: #FFF8E1;
+      border: 2px solid var(--accent); border-radius: var(--radius);
+      padding: 8px 16px; margin: 0 auto 4px;
+      font-weight: 700; color: var(--brand-dark); font-size: 0.92em;
+      text-align: center; max-width: var(--card-max);
     }
 
     /* ── Thank-you page ────────────────────────────────── */
@@ -203,7 +217,7 @@ const jsPsych = initJsPsych({
 
 
 // ─── 0. Consent ──────────────────────────────────────────
-// Data keys: consent_agree
+// Data keys: consent_agree, publication_consent
 
 const paperContextHtml = (PAPER_TITLE || SUBMITTER)
   ? '<div class="paper-context">' +
@@ -224,27 +238,24 @@ const consent = {
           html:
             '<div class="consent-header">' +
               '<div class="ch-center">' +
-                '<img src="uclaSeal.jpeg" alt="UCLA Seal" class="ucla-seal" />' +
-                '<h1>Human \u00d7 AI Finance 2026</h1>' +
-                '<h2>UCLA Anderson School of Management<br>CO-AUTHOR SURVEY</h2>' +
+                '<img src="../ucla-anderson-logo-white.svg" alt="UCLA Anderson School of Management" class="ucla-logo" />' +
+                '<h1>Co-Author Survey</h1>' +
+                '<h2>Human \u00d7 AI Finance 2026 \u2014 UCLA Anderson School of Management</h2>' +
               '</div>' +
               paperContextHtml +
               '<p>Your co-author has submitted a paper to Human \u00d7 AI Finance 2026. ' +
-                'This short survey collects information about your individual experience ' +
-                'using AI and how your team coordinated AI use. It should take ' +
-                'approximately <strong>5 minutes</strong>.</p>' +
-              '<p>Your survey responses may be used for academic research on ' +
-                'AI-assisted writing and collaborative workflows. Only anonymized and ' +
-                'aggregate statistics will be published. No individual author will be ' +
-                'identified in any research output without separate explicit permission.</p>' +
-              '<p>Your responses to questions beyond the content of the paper ' +
-                '(e.g., about your background, workflow, or AI usage) will <strong>not</strong> ' +
-                'affect the evaluation or score of the paper in any way.</p>' +
-              '<p>You may withdraw your consent at any time by emailing ' +
+                'We\u2019d like to ask a few brief questions about your individual experience ' +
+                'using AI and how your team coordinated AI use. This should take about ' +
+                '<strong>5 minutes</strong>.</p>' +
+              '<div class="review-disclaimer" style="display:block; text-align:center; margin:16px 0;">' +
+                'Your survey responses will <strong>not</strong> affect the paper\u2019s evaluation or score.' +
+              '</div>' +
+              '<p style="margin-top:12px;">By continuing, you agree that anonymized survey data ' +
+                'may be used for academic research on AI-assisted writing.</p>' +
+              '<p>You may withdraw at any time by emailing ' +
                 '<a href="mailto:vhaddad+humanxai@g.ucla.edu">vhaddad+humanxai@g.ucla.edu</a>. ' +
-                'The conference website ' +
-                '(<a href="https://humanxaifinance.org" target="_blank">humanxaifinance.org</a>) ' +
-                'provides full details.</p>' +
+                'See <a href="https://humanxaifinance.org" target="_blank">humanxaifinance.org</a> ' +
+                'for full details about the conference.</p>' +
             '</div>'
         },
         {
@@ -252,9 +263,17 @@ const consent = {
           title: " ",
           isRequired: true,
           choices: [
-            "I have read and agree to the terms outlined above."
+            "I agree to the terms above."
           ],
           validators: [{ type: "answercount", minCount: 1, text: "You must agree to continue." }]
+        },
+        {
+          type: "checkbox", name: "publication_consent",
+          title: " ",
+          isRequired: false,
+          choices: [
+            "I agree that my paper, AI reviewer comments, and scores may be published online."
+          ]
         }
       ]
     }]
@@ -270,11 +289,11 @@ const aboutYou = {
   type: jsPsychSurvey,
   survey_json: {
     title: "About You",
-    description: "Your responses will not affect the paper\u2019s evaluation or score.",
     showQuestionNumbers: "off",
     completeText: "Next",
     pages: [{
       elements: [
+        { type: "html", name: "about_disclaimer", html: '<div class="review-disclaimer">Your responses will not affect the paper\u2019s evaluation or score.</div>' },
         { type: "text", name: "name", title: "Full name", isRequired: true },
         {
           type: "text", name: "email", title: "Email address",
@@ -310,12 +329,12 @@ const aiTools = {
   type: jsPsychSurvey,
   survey_json: {
     title: "AI Tools You Used",
-    description: "Your responses will not affect the paper\u2019s evaluation or score. " +
-                 "Tell us what AI tools you personally used and your level of reliance on each.",
+    description: "Tell us what AI tools you personally used and your level of reliance on each.",
     showQuestionNumbers: "off",
     completeText: "Next",
     pages: [{
       elements: [
+        { type: "html", name: "tools_disclaimer", html: '<div class="review-disclaimer">Your responses will not affect the paper\u2019s evaluation or score.</div>' },
         {
           type: "matrixdynamic", name: "ai_tools_used",
           title: "List each AI tool or model you used and your level of reliance on each.",
@@ -392,13 +411,13 @@ const aiContribution = {
   type: jsPsychSurvey,
   survey_json: {
     title: "AI\u2019s Role in Your Research",
-    description: "Your responses will not affect the paper\u2019s evaluation or score. " +
-                 "For each research task, tell us what role AI played in your own work. " +
+    description: "For each research task, tell us what role AI played in your own work. " +
                  "Check \u201cNot relevant\u201d if a task didn\u2019t apply to you.",
     showQuestionNumbers: "off",
     completeText: "Next",
     pages: [{
       elements: [
+        { type: "html", name: "contribution_disclaimer", html: '<div class="review-disclaimer">Your responses will not affect the paper\u2019s evaluation or score.</div>' },
         {
           type: "matrix", name: "ai_role_by_task",
           title: "For each task, what role did AI play?",
@@ -420,19 +439,18 @@ const aiContribution = {
 
 
 // ─── 4. Collaboration & AI Coordination ──────────────────
-// Data keys: ai_coordination, your_ai_role,
-//   coauthor_ai_discussion, workflow_description
+// Data keys: ai_coordination, your_ai_role, workflow_description
 
 const collaboration = {
   type: jsPsychSurvey,
   survey_json: {
     title: "Collaboration & AI Coordination",
-    description: "Your responses will not affect the paper\u2019s evaluation or score. " +
-                 "Help us understand how your team coordinated AI use.",
+    description: "Help us understand how your team coordinated AI use.",
     showQuestionNumbers: "off",
     completeText: "Submit",
     pages: [{
       elements: [
+        { type: "html", name: "collab_disclaimer", html: '<div class="review-disclaimer">Your responses will not affect the paper\u2019s evaluation or score.</div>' },
         {
           type: "radiogroup", name: "ai_coordination",
           title: "How did your team coordinate AI use across co-authors?",
@@ -456,13 +474,6 @@ const collaboration = {
             { value: "no_direct_use",  text: "I did not use AI directly" }
           ],
           showOtherItem: true, otherText: "Other"
-        },
-        {
-          type: "rating", name: "coauthor_ai_discussion",
-          title: "How much did you discuss AI strategies with your co-authors?",
-          isRequired: true,
-          rateMin: 1, rateMax: 7,
-          minRateDescription: "Not at all", maxRateDescription: "Extensively"
         },
         {
           type: "comment", name: "workflow_description",
