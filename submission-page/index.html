@@ -104,7 +104,7 @@
     .sd-matrix__cell--header {
       font-size: 0.78em !important; white-space: normal !important;
       word-break: break-word !important; text-align: center !important;
-      padding: 6px 4px !important;
+      padding: 6px 4px !important; font-weight: 700 !important;
     }
     .sd-matrix__cell { padding: 8px 4px !important; text-align: center !important; }
     .sd-matrix__cell:first-child {
@@ -533,11 +533,13 @@ const aiTools = {
           title: "Without AI, how long would this paper have taken you and your collaborators to produce at a comparable quality level?",
           isRequired: true,
           choices: [
-            { value: "not_possible", text: "I could not have produced this paper without AI" },
-            { value: "2-4x",         text: "2\u20134\u00d7 longer" },
-            { value: "4-8x",         text: "4\u20138\u00d7 longer" },
-            { value: "8x+",          text: "More than 8\u00d7 longer" },
-            { value: "same",          text: "About the same amount of time" }
+            { value: "less",          text: "Less time (AI slowed me down)" },
+            { value: "same",          text: "About the same amount of time" },
+            { value: "up_to_2x",     text: "Up to twice as long" },
+            { value: "2-4x",         text: "Between two to four times as long" },
+            { value: "4-8x",         text: "Between four to eight times as long" },
+            { value: "8x+",          text: "More than eight times as long" },
+            { value: "not_possible",  text: "I could not have produced this paper without AI" }
           ]
         },
         {
