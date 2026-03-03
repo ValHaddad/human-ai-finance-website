@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /submission-page/
 
 Sitemap: https://humanxaifinance.org/sitemap.xml
