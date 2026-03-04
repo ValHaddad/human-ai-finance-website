@@ -184,14 +184,21 @@
  *
  * URL params:
  *   ?paper=TITLE&submitter=NAME  — displayed in consent header
+ *   ?session=ID                  — links response to primary submission
+ *   ?coauthor=NAME               — co-author's name (for reference)
  *   ?demo                        — skip required-field validation
  */
 
 // ─── URL params ─────────────────────────────────────────
 const PARAMS = new URLSearchParams(window.location.search);
-const DEMO       = PARAMS.has("demo");
-const PAPER_TITLE = decodeURIComponent(PARAMS.get("paper")  || "");
-const SUBMITTER   = decodeURIComponent(PARAMS.get("submitter") || "");
+const DEMO            = PARAMS.has("demo");
+const PAPER_TITLE     = decodeURIComponent(PARAMS.get("paper")     || "");
+const SUBMITTER       = decodeURIComponent(PARAMS.get("submitter") || "");
+const PRIMARY_SESSION = PARAMS.get("session") || "";
+const COAUTHOR_NAME   = decodeURIComponent(PARAMS.get("coauthor") || "");
+
+/** Unique session identifier for this co-author response. */
+const SESSION_ID = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
 // ─── Shared constants ────────────────────────────────────
 
@@ -207,11 +214,49 @@ const RESEARCH_TASKS = [
 ];
 
 
+// ─── DataPipe helper ─────────────────────────────────────
+
+function sendToDataPipe(filename, data) {
+  return fetch("https://pipe.jspsych.org/api/data/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "*/*" },
+    body: JSON.stringify({
+      experimentID: "FSFCg5NIXOjk",
+      filename: filename,
+      data: data,
+    }),
+  });
+}
+
 // ─── jsPsych init ────────────────────────────────────────
 
 const jsPsych = initJsPsych({
   show_progress_bar: false,
-  on_finish() { jsPsych.data.displayData("json"); }
+  on_finish() {
+    const ts   = new Date().toISOString().replace(/[:.]/g, "-");
+    const base = `colab_${ts}_${SESSION_ID}`;
+
+    // Inject linkage metadata into the data
+    jsPsych.data.addProperties({
+      primary_session: PRIMARY_SESSION,
+      paper_title_param: PAPER_TITLE,
+      submitter_param: SUBMITTER,
+      coauthor_name_param: COAUTHOR_NAME
+    });
+
+    console.log("[DataPipe] Co-author session:", base);
+    console.log("[DataPipe] Linked to primary session:", PRIMARY_SESSION);
+
+    sendToDataPipe(`${base}.csv`, jsPsych.data.get().csv())
+      .then(r => r.json()).then(j => console.log("[DataPipe] CSV response:", j))
+      .catch(e => console.error("[DataPipe] CSV error:", e));
+
+    sendToDataPipe(`${base}.json`, jsPsych.data.get().json())
+      .then(r => r.json()).then(j => console.log("[DataPipe] JSON response:", j))
+      .catch(e => console.error("[DataPipe] JSON error:", e));
+
+    jsPsych.data.displayData("json");
+  }
 });
 
 
@@ -252,7 +297,7 @@ const consent = {
               '<p style="margin-top:12px;">By continuing, you agree that anonymized survey data ' +
                 'may be used for academic research on AI-assisted writing.</p>' +
               '<p>You may withdraw at any time by emailing ' +
-                '<a href="mailto:vhaddad+humanxai@g.ucla.edu">vhaddad+humanxai@g.ucla.edu</a>. ' +
+                '<a href="mailto:valentin.haddad@anderson.ucla.edu">valentin.haddad@anderson.ucla.edu</a>. ' +
                 'See <a href="https://humanxaifinance.org" target="_blank">humanxaifinance.org</a> ' +
                 'for full details about the conference.</p>' +
             '</div>'
@@ -499,7 +544,7 @@ const thankYou = {
       <div class="footer">
         <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
         <p>Questions? Contact
-           <a href="mailto:vhaddad+humanxai@g.ucla.edu">vhaddad+humanxai@g.ucla.edu</a></p>
+           <a href="mailto:valentin.haddad@anderson.ucla.edu">valentin.haddad@anderson.ucla.edu</a></p>
       </div>
     </div>
   `,

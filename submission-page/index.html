@@ -232,7 +232,7 @@ function sendToDataPipe(filename, data) {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "*/*" },
     body: JSON.stringify({
-      experimentID: "G4cMGtgbY7YU",
+      experimentID: "FSFCg5NIXOjk",
       filename: filename,
       data: data,
     }),
@@ -244,7 +244,7 @@ function sendBase64ToDataPipe(filename, base64data) {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "*/*" },
     body: JSON.stringify({
-      experimentID: "G4cMGtgbY7YU",
+      experimentID: "FSFCg5NIXOjk",
       filename: filename,
       data: base64data,
     }),
@@ -292,6 +292,47 @@ const jsPsych = initJsPsych({
       }
     }
 
+    // Co-author manifest with survey links
+    const COLAB_BASE = "https://humanxaifinance.org/submission-page/colab.html";
+    let paperTitle = "";
+    let submitterName = "";
+    let authors = [];
+    for (const trial of allData) {
+      const resp = trial.response || {};
+      if (resp.paper_title) paperTitle = resp.paper_title;
+      if (resp.name) submitterName = resp.name;
+      if (Array.isArray(resp.authors)) authors = resp.authors;
+    }
+
+    const coauthors = authors
+      .filter(a => a.author_name && a.author_email)
+      .map(a => {
+        const params = new URLSearchParams({
+          paper: paperTitle,
+          submitter: submitterName,
+          session: SESSION_ID,
+          coauthor: a.author_name
+        });
+        return {
+          name: a.author_name,
+          email: a.author_email,
+          affiliation: a.author_affiliation || "",
+          survey_link: `${COLAB_BASE}?${params.toString()}`
+        };
+      });
+
+    if (coauthors.length > 0) {
+      const manifest = JSON.stringify({
+        session_id: SESSION_ID,
+        paper_title: paperTitle,
+        submitter: submitterName,
+        coauthors: coauthors
+      });
+      sendToDataPipe(`${base}_coauthors.json`, manifest)
+        .then(r => r.json()).then(j => console.log("[DataPipe] coauthors response:", j))
+        .catch(e => console.error("[DataPipe] coauthors error:", e));
+    }
+
     jsPsych.data.displayData("json");
   }
 });
@@ -329,7 +370,7 @@ const consent = {
                 '<li>Anonymized survey data may be used for academic research on AI-assisted writing.</li>' +
               '</ul>' +
               '<p>You may withdraw at any time by emailing ' +
-                '<a href="mailto:vhaddad+humanxai@g.ucla.edu">vhaddad+humanxai@g.ucla.edu</a>. ' +
+                '<a href="mailto:valentin.haddad@anderson.ucla.edu">valentin.haddad@anderson.ucla.edu</a>. ' +
                 'See <a href="https://humanxaifinance.org" target="_blank">humanxaifinance.org</a> ' +
                 'for full details about the conference.</p>' +
             '</div>'
@@ -443,7 +484,7 @@ const yourPaper = {
           columns: [
             { name: "author_name",        title: "Name",        cellType: "text", isRequired: true },
             { name: "author_affiliation", title: "Affiliation", cellType: "text", isRequired: true },
-            { name: "author_email",       title: "Email",       cellType: "text" }
+            { name: "author_email",       title: "Email",       cellType: "text", isRequired: true }
           ],
           rowCount: 1,
           addRowText: "Add Author",
@@ -771,7 +812,7 @@ const thankYou = {
       <div class="footer">
         <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
         <p>Questions? Contact
-           <a href="mailto:vhaddad+humanxai@g.ucla.edu">vhaddad+humanxai@g.ucla.edu</a></p>
+           <a href="mailto:valentin.haddad@anderson.ucla.edu">valentin.haddad@anderson.ucla.edu</a></p>
       </div>
     </div>
   `,
