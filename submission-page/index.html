@@ -135,7 +135,6 @@
     [data-name="consent_agree"] .sd-selectbase__label::after {
       content: " *"; color: #e60a3e; font-weight: 600;
     }
-    [data-name="publication_consent"] .sd-question__header { display: none !important; }
 
     /* ── "Not used for review" disclaimer banner ──────── */
     .review-disclaimer {
@@ -207,10 +206,11 @@ const RESEARCH_TASKS = [
 
 /** Evaluation dimensions matching the reviewer rubric (Section 6). */
 const EVAL_DIMENSIONS = [
-  { value: "conceptual_innovation",     text: "Conceptual Innovation \u2014 How novel are the ideas or theoretical contributions?" },
+  { value: "conceptual_innovation",     text: "Conceptual Innovation \u2014 How novel are the ideas or concepts?" },
   { value: "methodological_originality", text: "Methodological Originality \u2014 How unique or creative is the methodology?" },
   { value: "relevance",                 text: "Relevance \u2014 How interesting is this to a finance research audience?" },
-  { value: "rigor",                     text: "Rigor \u2014 How accurate are the results and inferences, and how comprehensively are the research questions addressed?" }
+  { value: "rigor",                     text: "Rigor \u2014 How accurate are the results and inferences, and how comprehensively are the research questions addressed?" },
+  { value: "overall",                   text: "Overall Evaluation \u2014 How would you rate this paper overall?" }
 ];
 
 /** 1-7 column scale reused across rating matrices. */
@@ -344,12 +344,9 @@ const consent = {
           validators: [{ type: "answercount", minCount: 1, text: "You must agree to continue." }]
         },
         {
-          type: "checkbox", name: "publication_consent",
-          title: " ",
-          isRequired: false,
-          choices: [
-            "I agree that my paper, AI reviewer comments, and scores may be published online."
-          ]
+          type: "boolean", name: "publication_consent",
+          title: "I agree that my paper, AI reviewer comments, and scores may be published online.",
+          isRequired: false, labelTrue: "Yes", labelFalse: "No"
         }
       ]
     }]
@@ -427,7 +424,7 @@ const aboutYou = {
 
 
 // ─── 2. Your Paper ───────────────────────────────────────
-// Data keys: paper_title, authors (array), start_date_confirm
+// Data keys: paper_title, authors (array)
 
 const yourPaper = {
   type: jsPsychSurvey,
@@ -451,11 +448,6 @@ const yourPaper = {
           rowCount: 1,
           addRowText: "Add Author",
           removeRowText: "Remove"
-        },
-        {
-          type: "boolean", name: "start_date_confirm",
-          title: "Do you confirm that formal work on this paper began on or after February 18, 2026?",
-          isRequired: true, labelTrue: "Yes", labelFalse: "No"
         }
       ]
     }]
@@ -583,9 +575,9 @@ const aiContribution = {
           columns: [
             { value: "not_relevant",   text: "Not relevant" },
             { value: "tool",           text: "Tool (you directed everything)" },
-            { value: "assistant",      text: "Research assistant (delegated tasks, reviewed output)" },
+            { value: "assistant",      text: "Research assistant (you delegated tasks, you reviewed output)" },
             { value: "thought_partner", text: "Thought partner (back-and-forth collaboration)" },
-            { value: "primary",        text: "Primary contributor (AI led, you guided)" },
+            { value: "primary",        text: "Primary contributor (AI led detailed work, you provided high-level direction)" },
             { value: "editor",         text: "Editor (AI provided feedback or corrections)" }
           ],
           rows: RESEARCH_TASKS
@@ -602,8 +594,8 @@ const aiContribution = {
 const workflow = {
   type: jsPsychSurvey,
   survey_json: {
-    title: "Your Workflow",
-    description: "Help us understand how you actually worked with AI during this project.",
+    title: "Your Workflow (Optional)",
+    description: "Help us understand how you actually worked with AI during this project. This section is optional.",
     showQuestionNumbers: "off",
     completeText: "Next",
     pages: [{
@@ -717,7 +709,7 @@ const qualityForecasts = {
 
 
 // ─── 8. Paper Submission ─────────────────────────────────
-// Data keys: paper_pdf, paper_source
+// Data keys: start_date_confirm, paper_pdf, paper_source
 
 const paperSubmission = {
   type: jsPsychSurvey,
@@ -728,6 +720,11 @@ const paperSubmission = {
     completeText: "Submit",
     pages: [{
       elements: [
+        {
+          type: "boolean", name: "start_date_confirm",
+          title: "Do you confirm that formal work on this paper began on or after February 18, 2026?",
+          isRequired: true, labelTrue: "Yes", labelFalse: "No"
+        },
         {
           type: "html", name: "submission_instructions",
           html: '<div style="max-width:700px; margin:0 auto; padding:12px 16px; ' +

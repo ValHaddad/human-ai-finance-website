@@ -140,7 +140,6 @@
     [data-name="consent_agree"] .sd-selectbase__label::after {
       content: " *"; color: #e60a3e; font-weight: 600;
     }
-    [data-name="publication_consent"] .sd-question__header { display: none !important; }
 
     /* ── "Not used for review" disclaimer banner ──────── */
     .review-disclaimer {
@@ -268,12 +267,9 @@ const consent = {
           validators: [{ type: "answercount", minCount: 1, text: "You must agree to continue." }]
         },
         {
-          type: "checkbox", name: "publication_consent",
-          title: " ",
-          isRequired: false,
-          choices: [
-            "I agree that my paper, AI reviewer comments, and scores may be published online."
-          ]
+          type: "boolean", name: "publication_consent",
+          title: "I agree that my paper, AI reviewer comments, and scores may be published online.",
+          isRequired: false, labelTrue: "Yes", labelFalse: "No"
         }
       ]
     }]
@@ -427,9 +423,9 @@ const aiContribution = {
           columns: [
             { value: "not_relevant",    text: "Not relevant" },
             { value: "tool",            text: "Tool (you directed everything)" },
-            { value: "assistant",       text: "Research assistant (delegated tasks, reviewed output)" },
+            { value: "assistant",       text: "Research assistant (you delegated tasks, you reviewed output)" },
             { value: "thought_partner", text: "Thought partner (back-and-forth collaboration)" },
-            { value: "primary",         text: "Primary contributor (AI led, you guided)" },
+            { value: "primary",         text: "Primary contributor (AI led detailed work, you provided high-level direction)" },
             { value: "editor",          text: "Editor (AI provided feedback or corrections)" }
           ],
           rows: RESEARCH_TASKS
