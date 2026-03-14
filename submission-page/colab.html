@@ -161,6 +161,36 @@
       border-top: 3px solid var(--accent); color: var(--text-muted); font-size: 0.92em;
     }
     .debrief a { color: var(--brand); }
+
+    /* ── Red "Finalize" button ───────────────────────── */
+    .jspsych-btn {
+      background: #C41E3A !important; color: #fff !important;
+      font-size: 1.15rem !important; padding: 16px 40px !important;
+      border-radius: 8px !important;
+    }
+    .jspsych-btn:hover { background: #A0182E !important; }
+    .finalize-instruction {
+      color: #C41E3A; font-weight: 700; font-size: 1.05em;
+      text-align: center; margin-top: 28px;
+    }
+
+    /* ── Submitting / confirmation states ─────────────── */
+    .submission-status {
+      max-width: 640px; margin: 0 auto; text-align: center;
+      padding: 60px 24px; font-family: var(--font); line-height: 1.7;
+    }
+    .submission-status h2 { font-size: 1.6em; margin-bottom: 16px; }
+    .submission-spinner {
+      display: inline-block; width: 40px; height: 40px;
+      border: 4px solid #ddd; border-top-color: var(--brand);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .submission-success h2 { color: #2e7d32; }
+    .submission-success .checkmark { font-size: 3em; color: #2e7d32; margin-bottom: 12px; }
+    .submission-error h2 { color: #C41E3A; }
+    .submission-error .error-icon { font-size: 3em; color: #C41E3A; margin-bottom: 12px; }
   </style>
 </head>
 
@@ -247,15 +277,52 @@ const jsPsych = initJsPsych({
     console.log("[DataPipe] Co-author session:", base);
     console.log("[DataPipe] Linked to primary session:", PRIMARY_SESSION);
 
-    sendToDataPipe(`${base}.csv`, jsPsych.data.get().csv())
-      .then(r => r.json()).then(j => console.log("[DataPipe] CSV response:", j))
-      .catch(e => console.error("[DataPipe] CSV error:", e));
+    // Show loading state
+    const display = document.querySelector('.jspsych-content');
+    display.innerHTML = `
+      <div class="submission-status">
+        <div class="submission-spinner"></div>
+        <h2>Submitting Your Responses&hellip;</h2>
+        <p>Please wait. Do not close this tab.</p>
+      </div>
+    `;
 
-    sendToDataPipe(`${base}.json`, jsPsych.data.get().json())
-      .then(r => r.json()).then(j => console.log("[DataPipe] JSON response:", j))
-      .catch(e => console.error("[DataPipe] JSON error:", e));
+    const uploads = [
+      sendToDataPipe(`${base}.csv`, jsPsych.data.get().csv())
+        .then(r => r.json()).then(j => { console.log("[DataPipe] CSV response:", j); return j; }),
+      sendToDataPipe(`${base}.json`, jsPsych.data.get().json())
+        .then(r => r.json()).then(j => { console.log("[DataPipe] JSON response:", j); return j; })
+    ];
 
-    jsPsych.data.displayData("json");
+    Promise.all(uploads)
+      .then(() => {
+        display.innerHTML = `
+          <div class="submission-status submission-success">
+            <div class="checkmark">&#10003;</div>
+            <h2>Survey Submitted</h2>
+            <p>Thank you for completing the co-author survey.</p>
+            ${PAPER_TITLE ? '<p style="font-weight:700; color:var(--brand-dark);">&ldquo;' + PAPER_TITLE + '&rdquo;</p>' : ''}
+            <p style="margin-top:28px; color:#555;">You may now close this tab.</p>
+            <div style="margin-top:36px; padding-top:20px; border-top:3px solid var(--accent); color:#555; font-size:0.92em;">
+              <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
+              <p>Questions? Contact
+                <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a></p>
+            </div>
+          </div>
+        `;
+      })
+      .catch((err) => {
+        console.error("[DataPipe] Submission error:", err);
+        display.innerHTML = `
+          <div class="submission-status submission-error">
+            <div class="error-icon">&#10007;</div>
+            <h2>Submission Error</h2>
+            <p>There was a problem uploading your responses. Please try refreshing this page and submitting again.</p>
+            <p>If the problem persists, contact
+              <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a></p>
+          </div>
+        `;
+      });
   }
 });
 
@@ -539,8 +606,9 @@ const thankYou = {
   stimulus: `
     <div class="debrief">
       <h2>Thank You!</h2>
-      <p>We have received your responses. Thank you for taking the time to
-         complete this co-author survey.</p>
+      <p>Thank you for taking the time to complete this co-author survey.</p>
+      <p class="finalize-instruction">
+         &#9660; You must click the red button below to submit your responses &#9660;</p>
       <div class="footer">
         <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
         <p>Questions? Contact
