@@ -244,25 +244,107 @@ const RESEARCH_TASKS = [
 ];
 
 
-// ─── DataPipe helper ─────────────────────────────────────
+// ─── Upload configuration ────────────────────────────────
+const DATAPIPE_EXPERIMENT_ID = "FSFCg5NIXOjk";
+const DATAPIPE_DATA_URL = "https://pipe.jspsych.org/api/data/";
 
-function sendToDataPipe(filename, data) {
-  return fetch("https://pipe.jspsych.org/api/data/", {
+// *** IMPORTANT: Replace this URL after deploying the Google Apps Script ***
+// See scripts/google-apps-script.js for setup instructions.
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwppcJYu4V8KEh727rsxwpDvcccUYwIGE9rRcvejHGCfzebUq5741PwgLdXaumAd0tT/exec";
+
+const UPLOAD_TIMEOUT_MS = 300000; // 5 minutes
+
+// ─── Retry helper ────────────────────────────────────────
+async function withRetry(fn, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      console.warn(`[Upload] Attempt ${attempt + 1} failed:`, err.message);
+      if (attempt === maxRetries - 1) throw err;
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(3, attempt)));
+    }
+  }
+}
+
+// ─── Fetch with timeout ──────────────────────────────────
+function fetchWithTimeout(url, options, timeoutMs = UPLOAD_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timeout));
+}
+
+// ─── DataPipe helper (with response validation) ──────────
+
+async function sendToDataPipe(filename, data) {
+  const response = await fetchWithTimeout(DATAPIPE_DATA_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "*/*" },
     body: JSON.stringify({
-      experimentID: "FSFCg5NIXOjk",
+      experimentID: DATAPIPE_EXPERIMENT_ID,
       filename: filename,
       data: data,
     }),
   });
+  if (!response.ok) throw new Error(`DataPipe HTTP ${response.status} for ${filename}`);
+  const json = await response.json();
+  if (json.error) throw new Error(`DataPipe error for ${filename}: ${json.error}`);
+  console.log(`[DataPipe] ${filename} response:`, json);
+  return json;
+}
+
+// ─── Google Drive helper ─────────────────────────────────
+
+async function sendToGoogleDrive(filename, data, contentType) {
+  const response = await fetchWithTimeout(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    redirect: "follow",
+    body: JSON.stringify({
+      action: "data",
+      filename: filename,
+      data: data,
+      contentType: contentType || "application/json",
+    }),
+  });
+  if (response.status === 0 || response.type === "opaque") {
+    console.log(`[GoogleDrive] ${filename}: opaque response (likely succeeded)`);
+    return { success: true, filename };
+  }
+  if (!response.ok) throw new Error(`Google Drive HTTP ${response.status} for ${filename}`);
+  const text = await response.text();
+  try {
+    const json = JSON.parse(text);
+    if (!json.success) throw new Error(`Google Drive error for ${filename}: ${json.error || "unknown"}`);
+    console.log(`[GoogleDrive] ${filename} response:`, json);
+    return json;
+  } catch (e) {
+    console.log(`[GoogleDrive] ${filename}: non-JSON response, treating as success`);
+    return { success: true, filename };
+  }
+}
+
+// ─── Dual-save: send to both, succeed if either works ────
+
+async function dualSaveData(filename, data, contentType) {
+  const results = await Promise.allSettled([
+    withRetry(() => sendToDataPipe(filename, data)),
+    withRetry(() => sendToGoogleDrive(filename, data, contentType)),
+  ]);
+  const dpOk = results[0].status === "fulfilled";
+  const gdOk = results[1].status === "fulfilled";
+  if (!dpOk) console.error(`[DualSave] DataPipe failed for ${filename}:`, results[0].reason?.message);
+  if (!gdOk) console.error(`[DualSave] GoogleDrive failed for ${filename}:`, results[1].reason?.message);
+  if (!dpOk && !gdOk) throw new Error(`Both destinations failed for ${filename}`);
+  return { filename, datapipe: dpOk, googledrive: gdOk };
 }
 
 // ─── jsPsych init ────────────────────────────────────────
 
 const jsPsych = initJsPsych({
   show_progress_bar: false,
-  on_finish() {
+  async on_finish() {
     const ts   = new Date().toISOString().replace(/[:.]/g, "-");
     const base = `colab_${ts}_${SESSION_ID}`;
 
@@ -277,6 +359,22 @@ const jsPsych = initJsPsych({
     console.log("[DataPipe] Co-author session:", base);
     console.log("[DataPipe] Linked to primary session:", PRIMARY_SESSION);
 
+    // localStorage backup
+    const backupKey = `hxai_colab_${SESSION_ID}`;
+    try {
+      localStorage.setItem(backupKey, JSON.stringify({
+        session: base,
+        timestamp: new Date().toISOString(),
+        csv: jsPsych.data.get().csv(),
+        json: jsPsych.data.get().json(),
+        primarySession: PRIMARY_SESSION,
+        paperTitle: PAPER_TITLE,
+      }));
+      console.log("[Backup] Co-author data saved to localStorage");
+    } catch (e) {
+      console.warn("[Backup] localStorage save failed:", e.message);
+    }
+
     // Show loading state
     const display = document.querySelector('.jspsych-content');
     display.innerHTML = `
@@ -287,42 +385,43 @@ const jsPsych = initJsPsych({
       </div>
     `;
 
-    const uploads = [
-      sendToDataPipe(`${base}.csv`, jsPsych.data.get().csv())
-        .then(r => r.json()).then(j => { console.log("[DataPipe] CSV response:", j); return j; }),
-      sendToDataPipe(`${base}.json`, jsPsych.data.get().json())
-        .then(r => r.json()).then(j => { console.log("[DataPipe] JSON response:", j); return j; })
-    ];
+    try {
+      await Promise.all([
+        dualSaveData(`${base}.csv`, jsPsych.data.get().csv(), "text/csv"),
+        dualSaveData(`${base}.json`, jsPsych.data.get().json(), "application/json"),
+      ]);
 
-    Promise.all(uploads)
-      .then(() => {
-        display.innerHTML = `
-          <div class="submission-status submission-success">
-            <div class="checkmark">&#10003;</div>
-            <h2>Survey Submitted</h2>
-            <p>Thank you for completing the co-author survey.</p>
-            ${PAPER_TITLE ? '<p style="font-weight:700; color:var(--brand-dark);">&ldquo;' + PAPER_TITLE + '&rdquo;</p>' : ''}
-            <p style="margin-top:28px; color:#555;">You may now close this tab.</p>
-            <div style="margin-top:36px; padding-top:20px; border-top:3px solid var(--accent); color:#555; font-size:0.92em;">
-              <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
-              <p>Questions? Contact
-                <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a></p>
-            </div>
-          </div>
-        `;
-      })
-      .catch((err) => {
-        console.error("[DataPipe] Submission error:", err);
-        display.innerHTML = `
-          <div class="submission-status submission-error">
-            <div class="error-icon">&#10007;</div>
-            <h2>Submission Error</h2>
-            <p>There was a problem uploading your responses. Please try refreshing this page and submitting again.</p>
-            <p>If the problem persists, contact
+      // Clear backup on success
+      try { localStorage.removeItem(backupKey); } catch (e) { /* ignore */ }
+
+      display.innerHTML = `
+        <div class="submission-status submission-success">
+          <div class="checkmark">&#10003;</div>
+          <h2>Survey Submitted</h2>
+          <p>Thank you for completing the co-author survey.</p>
+          ${PAPER_TITLE ? '<p style="font-weight:700; color:var(--brand-dark);">&ldquo;' + PAPER_TITLE + '&rdquo;</p>' : ''}
+          <p style="margin-top:28px; color:#555;">You may now close this tab.</p>
+          <div style="margin-top:36px; padding-top:20px; border-top:3px solid var(--accent); color:#555; font-size:0.92em;">
+            <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
+            <p>Questions? Contact
               <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a></p>
           </div>
-        `;
-      });
+        </div>
+      `;
+    } catch (err) {
+      console.error("[DualSave] Submission error:", err);
+      display.innerHTML = `
+        <div class="submission-status submission-error">
+          <div class="error-icon">&#10007;</div>
+          <h2>Submission Error</h2>
+          <p>There was a problem uploading your responses. Your data has been saved locally in your browser as a backup.</p>
+          <p>Please try refreshing this page and submitting again.</p>
+          <p>If the problem persists, contact
+            <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a>
+            with session ID: <code>${base}</code></p>
+        </div>
+      `;
+    }
   }
 });
 

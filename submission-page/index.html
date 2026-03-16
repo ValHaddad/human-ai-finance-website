@@ -264,30 +264,184 @@ const SCALE_1_7 = [
 ];
 
 
-// ─── DataPipe helpers ────────────────────────────────────
+// ─── Upload configuration ────────────────────────────────
+const DATAPIPE_EXPERIMENT_ID = "FSFCg5NIXOjk";
+const DATAPIPE_DATA_URL = "https://pipe.jspsych.org/api/data/";
+const DATAPIPE_BASE64_URL = "https://pipe.jspsych.org/api/base64/";
 
-function sendToDataPipe(filename, data) {
-  return fetch("https://pipe.jspsych.org/api/data/", {
+// *** IMPORTANT: Replace this URL after deploying the Google Apps Script ***
+// See scripts/google-apps-script.js for setup instructions.
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwppcJYu4V8KEh727rsxwpDvcccUYwIGE9rRcvejHGCfzebUq5741PwgLdXaumAd0tT/exec";
+
+const UPLOAD_TIMEOUT_MS = 300000; // 5 minutes
+
+// ─── Retry helper ────────────────────────────────────────
+async function withRetry(fn, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      console.warn(`[Upload] Attempt ${attempt + 1} failed:`, err.message);
+      if (attempt === maxRetries - 1) throw err;
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(3, attempt)));
+    }
+  }
+}
+
+// ─── Fetch with timeout ──────────────────────────────────
+function fetchWithTimeout(url, options, timeoutMs = UPLOAD_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timeout));
+}
+
+// ─── DataPipe helpers (with response validation) ─────────
+
+async function sendToDataPipe(filename, data) {
+  const response = await fetchWithTimeout(DATAPIPE_DATA_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "*/*" },
     body: JSON.stringify({
-      experimentID: "FSFCg5NIXOjk",
+      experimentID: DATAPIPE_EXPERIMENT_ID,
       filename: filename,
       data: data,
     }),
   });
+  if (!response.ok) throw new Error(`DataPipe HTTP ${response.status} for ${filename}`);
+  const json = await response.json();
+  if (json.error) throw new Error(`DataPipe error for ${filename}: ${json.error}`);
+  console.log(`[DataPipe] ${filename} response:`, json);
+  return json;
 }
 
-function sendBase64ToDataPipe(filename, base64data) {
-  return fetch("https://pipe.jspsych.org/api/base64/", {
+async function sendBase64ToDataPipe(filename, base64data) {
+  const response = await fetchWithTimeout(DATAPIPE_BASE64_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "*/*" },
     body: JSON.stringify({
-      experimentID: "FSFCg5NIXOjk",
+      experimentID: DATAPIPE_EXPERIMENT_ID,
       filename: filename,
       data: base64data,
     }),
   });
+  if (!response.ok) throw new Error(`DataPipe HTTP ${response.status} for ${filename}`);
+  const json = await response.json();
+  if (json.error) throw new Error(`DataPipe error for ${filename}: ${json.error}`);
+  console.log(`[DataPipe] ${filename} response:`, json);
+  return json;
+}
+
+// ─── Google Drive helpers ────────────────────────────────
+
+async function sendToGoogleDrive(filename, data, contentType) {
+  const response = await fetchWithTimeout(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    redirect: "follow",
+    body: JSON.stringify({
+      action: "data",
+      filename: filename,
+      data: data,
+      contentType: contentType || "application/json",
+    }),
+  });
+  // GAS may return a redirect that resolves with type "cors" or "opaque"
+  if (response.status === 0 || response.type === "opaque") {
+    // Opaque response means we can't read it, but the request was sent
+    console.log(`[GoogleDrive] ${filename}: opaque response (likely succeeded)`);
+    return { success: true, filename };
+  }
+  if (!response.ok) throw new Error(`Google Drive HTTP ${response.status} for ${filename}`);
+  const text = await response.text();
+  try {
+    const json = JSON.parse(text);
+    if (!json.success) throw new Error(`Google Drive error for ${filename}: ${json.error || "unknown"}`);
+    console.log(`[GoogleDrive] ${filename} response:`, json);
+    return json;
+  } catch (e) {
+    // If we got a non-error HTTP response but can't parse JSON, treat as success
+    console.log(`[GoogleDrive] ${filename}: non-JSON response, treating as success`);
+    return { success: true, filename };
+  }
+}
+
+async function sendBase64ToGoogleDrive(filename, base64data, mimeType) {
+  const response = await fetchWithTimeout(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    redirect: "follow",
+    body: JSON.stringify({
+      action: "base64",
+      filename: filename,
+      data: base64data,
+      mimeType: mimeType || "application/octet-stream",
+    }),
+  });
+  if (response.status === 0 || response.type === "opaque") {
+    console.log(`[GoogleDrive] ${filename}: opaque response (likely succeeded)`);
+    return { success: true, filename };
+  }
+  if (!response.ok) throw new Error(`Google Drive HTTP ${response.status} for ${filename}`);
+  const text = await response.text();
+  try {
+    const json = JSON.parse(text);
+    if (!json.success) throw new Error(`Google Drive error for ${filename}: ${json.error || "unknown"}`);
+    console.log(`[GoogleDrive] ${filename} response:`, json);
+    return json;
+  } catch (e) {
+    console.log(`[GoogleDrive] ${filename}: non-JSON response, treating as success`);
+    return { success: true, filename };
+  }
+}
+
+// ─── Dual-save: send to both, succeed if either works ────
+
+async function dualSaveData(filename, data, contentType) {
+  const results = await Promise.allSettled([
+    withRetry(() => sendToDataPipe(filename, data)),
+    withRetry(() => sendToGoogleDrive(filename, data, contentType)),
+  ]);
+  const dpOk = results[0].status === "fulfilled";
+  const gdOk = results[1].status === "fulfilled";
+  if (!dpOk) console.error(`[DualSave] DataPipe failed for ${filename}:`, results[0].reason?.message);
+  if (!gdOk) console.error(`[DualSave] GoogleDrive failed for ${filename}:`, results[1].reason?.message);
+  if (!dpOk && !gdOk) throw new Error(`Both destinations failed for ${filename}`);
+  return { filename, datapipe: dpOk, googledrive: gdOk };
+}
+
+async function dualSaveBase64(filename, base64data, mimeType) {
+  const results = await Promise.allSettled([
+    withRetry(() => sendBase64ToDataPipe(filename, base64data)),
+    withRetry(() => sendBase64ToGoogleDrive(filename, base64data, mimeType)),
+  ]);
+  const dpOk = results[0].status === "fulfilled";
+  const gdOk = results[1].status === "fulfilled";
+  if (!dpOk) console.error(`[DualSave] DataPipe failed for ${filename}:`, results[0].reason?.message);
+  if (!gdOk) console.error(`[DualSave] GoogleDrive failed for ${filename}:`, results[1].reason?.message);
+  if (!dpOk && !gdOk) throw new Error(`Both destinations failed for ${filename}`);
+  return { filename, datapipe: dpOk, googledrive: gdOk };
+}
+
+// ─── Progress UI helper ─────────────────────────────────
+
+function updateProgress(display, items) {
+  const rows = items.map(item => {
+    const icon = item.status === "done" ? "&#10003;"
+               : item.status === "error" ? "&#10007;"
+               : '<span class="submission-spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span>';
+    const color = item.status === "done" ? "#2a7d2a"
+               : item.status === "error" ? "#c0392b"
+               : "#555";
+    return `<div style="padding:6px 0;color:${color};">${icon} ${item.label}</div>`;
+  }).join("");
+  display.innerHTML = `
+    <div class="submission-status">
+      <h2>Submitting Your Data&hellip;</h2>
+      <p>Please wait while we upload your submission. Do not close this tab.</p>
+      <div style="text-align:left;max-width:420px;margin:20px auto;">${rows}</div>
+    </div>
+  `;
 }
 
 
@@ -295,13 +449,12 @@ function sendBase64ToDataPipe(filename, base64data) {
 
 const jsPsych = initJsPsych({
   show_progress_bar: false,
-  on_finish() {
+  async on_finish() {
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
     const base = `${ts}_${SESSION_ID}`;
 
     console.log("[DataPipe] Session:", base);
     console.log("[DataPipe] Trial count:", jsPsych.data.get().count());
-    console.log("[DataPipe] All data:", jsPsych.data.get().values());
 
     // Extract paper title and submitter name for confirmation screen
     const allData = jsPsych.data.get().values();
@@ -315,49 +468,49 @@ const jsPsych = initJsPsych({
       if (Array.isArray(resp.authors)) authors = resp.authors;
     }
 
-    // Show loading state
+    // ── localStorage backup (safety net) ──
+    const backupKey = `hxai_submission_${SESSION_ID}`;
+    try {
+      localStorage.setItem(backupKey, JSON.stringify({
+        session: base,
+        timestamp: new Date().toISOString(),
+        csv: jsPsych.data.get().csv(),
+        json: jsPsych.data.get().json(),
+        paperTitle, submitterName, authors,
+      }));
+      console.log("[Backup] Survey data saved to localStorage");
+    } catch (e) {
+      console.warn("[Backup] localStorage save failed:", e.message);
+    }
+
+    // ── Build progress tracker ──
     const display = document.querySelector('.jspsych-content');
-    display.innerHTML = `
-      <div class="submission-status">
-        <div class="submission-spinner"></div>
-        <h2>Submitting Your Data&hellip;</h2>
-        <p>Please wait while we upload your submission. Do not close this tab.</p>
-      </div>
-    `;
+    const progressItems = [
+      { id: "csv", label: "Survey data (CSV)", status: "pending" },
+      { id: "json", label: "Survey data (JSON)", status: "pending" },
+    ];
 
-    // Collect all upload promises
-    const uploads = [];
-
-    // Survey responses (CSV + JSON)
-    uploads.push(
-      sendToDataPipe(`${base}.csv`, jsPsych.data.get().csv())
-        .then(r => r.json()).then(j => { console.log("[DataPipe] CSV response:", j); return j; })
-    );
-    uploads.push(
-      sendToDataPipe(`${base}.json`, jsPsych.data.get().json())
-        .then(r => r.json()).then(j => { console.log("[DataPipe] JSON response:", j); return j; })
-    );
-
-    // Uploaded files (paper_pdf, paper_source)
+    // Identify file uploads
+    const fileUploads = [];
     for (const trial of allData) {
       const resp = trial.response || {};
       for (const key of ["paper_pdf", "paper_source"]) {
         const files = resp[key];
         if (Array.isArray(files)) {
           files.forEach((f) => {
-            console.log(`[DataPipe] Uploading file: ${key} -> ${f.name}`);
             const raw = f.content.split(",")[1];
             const ext = f.name.split(".").pop();
-            uploads.push(
-              sendBase64ToDataPipe(`${base}_${key}.${ext}`, raw)
-                .then(r => r.json()).then(j => { console.log(`[DataPipe] ${key} response:`, j); return j; })
-            );
+            const mimeType = f.content.split(";")[0].split(":")[1] || "application/octet-stream";
+            const fname = `${base}_${key}.${ext}`;
+            const sizeMB = (raw.length * 0.75 / 1024 / 1024).toFixed(1);
+            fileUploads.push({ key, fname, raw, mimeType, label: `${key === "paper_pdf" ? "Paper PDF" : "Source file"} (${sizeMB} MB)` });
+            progressItems.push({ id: fname, label: `${key === "paper_pdf" ? "Paper PDF" : "Source file"} (${sizeMB} MB)`, status: "pending" });
           });
         }
       }
     }
 
-    // Co-author manifest with survey links
+    // Co-author manifest
     const COLAB_BASE = "https://humanxaifinance.org/submission-page/colab.html";
     const coauthors = authors
       .filter(a => a.author_name && a.author_email)
@@ -377,60 +530,127 @@ const jsPsych = initJsPsych({
       });
 
     if (coauthors.length > 0) {
+      progressItems.push({ id: "coauthors", label: "Co-author manifest", status: "pending" });
+    }
+
+    updateProgress(display, progressItems);
+
+    // ── Execute uploads with progress tracking ──
+    const uploadResults = [];
+
+    async function trackUpload(id, uploadFn) {
+      const item = progressItems.find(p => p.id === id);
+      item.status = "uploading";
+      updateProgress(display, progressItems);
+      try {
+        const result = await uploadFn();
+        item.status = "done";
+        updateProgress(display, progressItems);
+        uploadResults.push({ id, ...result, success: true });
+      } catch (err) {
+        item.status = "error";
+        updateProgress(display, progressItems);
+        uploadResults.push({ id, success: false, error: err.message });
+        console.error(`[Upload] ${id} failed:`, err);
+      }
+    }
+
+    // Run all uploads concurrently with individual tracking
+    const uploadTasks = [
+      trackUpload("csv", () => dualSaveData(`${base}.csv`, jsPsych.data.get().csv(), "text/csv")),
+      trackUpload("json", () => dualSaveData(`${base}.json`, jsPsych.data.get().json(), "application/json")),
+    ];
+
+    for (const f of fileUploads) {
+      uploadTasks.push(
+        trackUpload(f.fname, () => dualSaveBase64(f.fname, f.raw, f.mimeType))
+      );
+    }
+
+    if (coauthors.length > 0) {
       const manifest = JSON.stringify({
         session_id: SESSION_ID,
         paper_title: paperTitle,
         submitter: submitterName,
         coauthors: coauthors
       });
-      uploads.push(
-        sendToDataPipe(`${base}_coauthors.json`, manifest)
-          .then(r => r.json()).then(j => { console.log("[DataPipe] coauthors response:", j); return j; })
+      uploadTasks.push(
+        trackUpload("coauthors", () => dualSaveData(`${base}_coauthors.json`, manifest, "application/json"))
       );
     }
 
-    // Wait for all uploads, then show confirmation or error
-    Promise.all(uploads)
-      .then(() => {
-        const coauthorNote = coauthors.length > 0
-          ? `<p style="margin-top:18px;">Co-author survey links have been generated for
-             <strong>${coauthors.length}</strong> co-author${coauthors.length > 1 ? 's' : ''}.
-             Please share the links with your co-authors via the email template provided to the submitting author.</p>`
-          : '';
+    await Promise.all(uploadTasks);
 
-        display.innerHTML = `
-          <div class="submission-status submission-success">
-            <div class="checkmark">&#10003;</div>
-            <h2>Submission Confirmed</h2>
-            <p>Your submission has been successfully received.</p>
-            ${paperTitle ? `<p class="paper-title">&ldquo;${paperTitle}&rdquo;</p>` : ''}
-            ${submitterName ? `<p>Submitted by ${submitterName}</p>` : ''}
-            ${coauthorNote}
-            <p style="margin-top:28px; color:#555;">You may now close this tab.</p>
-            <div style="margin-top:36px; padding-top:20px; border-top:3px solid var(--accent); color:#555; font-size:0.92em;">
-              <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
-              <p>Questions? Contact
-                <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a></p>
-            </div>
+    // ── Show results ──
+    const allOk = uploadResults.every(r => r.success);
+    const anyOk = uploadResults.some(r => r.success);
+    const failures = uploadResults.filter(r => !r.success);
+
+    // Clear localStorage backup if at least text data was saved
+    const textDataSaved = uploadResults.some(r => r.id === "csv" && r.success)
+                       || uploadResults.some(r => r.id === "json" && r.success);
+    if (textDataSaved) {
+      try { localStorage.removeItem(backupKey); } catch (e) { /* ignore */ }
+    }
+
+    if (allOk) {
+      const coauthorNote = coauthors.length > 0
+        ? `<p style="margin-top:18px;">Co-author survey links have been generated for
+           <strong>${coauthors.length}</strong> co-author${coauthors.length > 1 ? 's' : ''}.
+           Please share the links with your co-authors via the email template provided to the submitting author.</p>`
+        : '';
+
+      display.innerHTML = `
+        <div class="submission-status submission-success">
+          <div class="checkmark">&#10003;</div>
+          <h2>Submission Confirmed</h2>
+          <p>Your submission has been successfully received.</p>
+          ${paperTitle ? `<p class="paper-title">&ldquo;${paperTitle}&rdquo;</p>` : ''}
+          ${submitterName ? `<p>Submitted by ${submitterName}</p>` : ''}
+          ${coauthorNote}
+          <p style="margin-top:28px; color:#555;">You may now close this tab.</p>
+          <div style="margin-top:36px; padding-top:20px; border-top:3px solid var(--accent); color:#555; font-size:0.92em;">
+            <p><em>Human &times; AI Finance 2026 &mdash; UCLA Anderson School of Management</em></p>
+            <p>Questions? Contact
+              <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a></p>
           </div>
-        `;
-      })
-      .catch((err) => {
-        console.error("[DataPipe] Submission error:", err);
-        display.innerHTML = `
-          <div class="submission-status submission-error">
-            <div class="error-icon">&#10007;</div>
-            <h2>Submission Error</h2>
-            <p>There was a problem uploading your submission. Please try the following:</p>
-            <ol style="text-align:left; max-width:480px; margin:16px auto;">
-              <li>Check your internet connection</li>
-              <li>Refresh this page and try submitting again</li>
-              <li>If the problem persists, contact
-                <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a></li>
-            </ol>
-          </div>
-        `;
-      });
+        </div>
+      `;
+    } else if (anyOk) {
+      const failList = failures.map(f => `<li><strong>${f.id}</strong>: ${f.error}</li>`).join("");
+      const savedNote = textDataSaved
+        ? "<p><strong>Your survey responses were saved successfully.</strong> Only the items below had issues:</p>"
+        : "<p>Some uploads encountered issues:</p>";
+
+      display.innerHTML = `
+        <div class="submission-status" style="border-left:4px solid #e67e22;">
+          <div style="font-size:2em;color:#e67e22;">&#9888;</div>
+          <h2>Partial Submission</h2>
+          ${savedNote}
+          <ul style="text-align:left; max-width:480px; margin:16px auto;">${failList}</ul>
+          <p>Please contact
+            <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a>
+            with your session ID: <code>${base}</code></p>
+          <p style="margin-top:28px; color:#555;">You may also try refreshing this page to resubmit.</p>
+        </div>
+      `;
+    } else {
+      display.innerHTML = `
+        <div class="submission-status submission-error">
+          <div class="error-icon">&#10007;</div>
+          <h2>Submission Error</h2>
+          <p>There was a problem uploading your submission. Your data has been saved locally in your browser as a backup.</p>
+          <p>Please try the following:</p>
+          <ol style="text-align:left; max-width:480px; margin:16px auto;">
+            <li>Check your internet connection</li>
+            <li>Refresh this page and try submitting again</li>
+            <li>If the problem persists, contact
+              <a href="mailto:valentin.haddad@anderson.ucla.edu" style="color:var(--brand);">valentin.haddad@anderson.ucla.edu</a>
+              with session ID: <code>${base}</code></li>
+          </ol>
+        </div>
+      `;
+    }
   }
 });
 
@@ -883,8 +1103,8 @@ const paperSubmission = {
         {
           type: "file", name: "paper_source",
           title: "Machine-readable version",
-          description: "LaTeX, Word, or Markdown version of your paper. Include figures and tables if not in the main file. If multiple files (e.g., LaTeX + bib + figures), upload as a .zip",
-          acceptedTypes: ".tex,.docx,.doc,.md,.zip,application/zip,application/x-zip-compressed",
+          description: "Upload a .zip archive containing your paper source files (e.g., LaTeX + bib + figures, or Word + figures).",
+          acceptedTypes: ".zip,application/zip,application/x-zip-compressed",
           waitForUpload: true,
           maxSize: 52428800,
           isRequired: true
