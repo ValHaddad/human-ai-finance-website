@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submission Dashboard — Human × AI Finance</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Password Gate -->
+<div id="login-gate" class="login-wrapper">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>Human × AI Finance</h1>
+            <p>Submission Dashboard</p>
+        </div>
+        <div class="login-body">
+            <form id="login-form">
+                <input type="password" id="password-input" placeholder="Enter dashboard password" autocomplete="off" autofocus>
+                <button type="submit">Access Dashboard</button>
+            </form>
+            <p id="login-error" class="login-error">Incorrect password. Please try again.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard (hidden until authenticated) -->
+<div id="dashboard" class="dashboard">
+    <header class="dashboard-header">
+        <div class="container" style="max-width:1100px">
+            <h1>Human × AI Finance — Submission Dashboard</h1>
+            <span class="updated" id="last-updated"></span>
+        </div>
+    </header>
+
+    <div class="dashboard-body">
+
+        <!-- Section 1: At a Glance -->
+        <div class="section-divider">
+            <h2>At a Glance</h2>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="value" id="total-submissions">—</div>
+                <div class="label">Paper Submissions</div>
+            </div>
+            <div class="summary-card">
+                <div class="value" id="total-coauthor">—</div>
+                <div class="label">Co-Author Responses</div>
+            </div>
+            <div class="summary-card">
+                <div class="value" id="days-remaining">—</div>
+                <div class="label">Days Until Deadline</div>
+            </div>
+            <div class="summary-card">
+                <div class="value" id="fields-count">—</div>
+                <div class="label">Fields Represented</div>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-section full-width">
+                <h2>Submissions Over Time</h2>
+                <div class="chart-container">
+                    <canvas id="chart-timeline"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Who's Submitting -->
+        <div class="section-divider">
+            <h2>Who's Submitting</h2>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-section">
+                <h2>Primary Field</h2>
+                <div class="chart-container">
+                    <canvas id="chart-fields"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Number of Co-Authors per Paper</h2>
+                <div class="chart-container">
+                    <canvas id="chart-coauthors"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Programming Proficiency (1–5)</h2>
+                <div class="chart-container">
+                    <canvas id="chart-programming"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Paper-Writing Experience (1–5)</h2>
+                <div class="chart-container">
+                    <canvas id="chart-writing-exp"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section full-width">
+                <h2>Prior AI Experience</h2>
+                <div class="chart-container">
+                    <canvas id="chart-experience"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: How They Worked With AI -->
+        <div class="section-divider">
+            <h2>How They Worked With AI</h2>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-section">
+                <h2>AI Tools Used</h2>
+                <div class="chart-container">
+                    <canvas id="chart-tools"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>AI Tools — Avg. Usage Intensity (1–5)</h2>
+                <div class="chart-container">
+                    <canvas id="chart-tool-intensity"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Tool Reliance Level (1–5)</h2>
+                <div class="chart-container">
+                    <canvas id="chart-reliance"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Avg. Reliance by Programming Proficiency</h2>
+                <div class="chart-container">
+                    <canvas id="chart-reliance-by-prof"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section full-width">
+                <h2>AI Role by Research Task</h2>
+                <div class="chart-container">
+                    <canvas id="chart-roles"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Personal Hours Spent</h2>
+                <div class="chart-container">
+                    <canvas id="chart-personal-hours"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Team Hours Spent</h2>
+                <div class="chart-container">
+                    <canvas id="chart-team-hours"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section full-width">
+                <h2>Counterfactual: Time Without AI</h2>
+                <div class="chart-container">
+                    <canvas id="chart-counterfactual"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section full-width">
+                <h2>Counterfactual by AI Experience</h2>
+                <div class="chart-container">
+                    <canvas id="chart-cf-by-exp"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>AI Coordination Strategy</h2>
+                <div class="chart-container">
+                    <canvas id="chart-coordination"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Submitter's AI Role</h2>
+                <div class="chart-container">
+                    <canvas id="chart-submitter-role"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Self-Assessment -->
+        <div class="section-divider">
+            <h2>Self-Assessment</h2>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-section full-width">
+                <div class="chart-header-row">
+                    <h2>Self-Evaluation (Mean Scores, 1–7)</h2>
+                    <select id="selfeval-split" class="chart-dropdown">
+                        <option value="all">All Submissions</option>
+                        <option value="field">Split by Field</option>
+                        <option value="writing_exp">Split by Writing Experience</option>
+                        <option value="ai_exp">Split by AI Experience</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-selfeval"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <div class="chart-header-row">
+                    <h2>Satisfaction with Final Paper (1–7)</h2>
+                    <select id="satisfaction-split" class="chart-dropdown">
+                        <option value="all">All</option>
+                        <option value="field">By Field</option>
+                        <option value="writing_exp">By Writing Exp</option>
+                        <option value="ai_exp">By AI Exp</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-satisfaction"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <div class="chart-header-row">
+                    <h2>Future AI Likelihood (1–7)</h2>
+                    <select id="future-ai-split" class="chart-dropdown">
+                        <option value="all">All</option>
+                        <option value="field">By Field</option>
+                        <option value="writing_exp">By Writing Exp</option>
+                        <option value="ai_exp">By AI Exp</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-future-ai"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section full-width">
+                <div class="chart-header-row">
+                    <h2>AI Review Influence (1–7)</h2>
+                    <select id="review-influence-split" class="chart-dropdown">
+                        <option value="all">All</option>
+                        <option value="field">By Field</option>
+                        <option value="writing_exp">By Writing Exp</option>
+                        <option value="ai_exp">By AI Exp</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-review-influence"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section full-width">
+                <h2>Mean Scores by Field</h2>
+                <div class="chart-container chart-container-wide">
+                    <canvas id="chart-likert-by-field"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Submitted Papers -->
+        <div class="section-divider">
+            <h2>Submitted Papers</h2>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-section full-width">
+                <ol class="paper-list" id="paper-list"></ol>
+            </div>
+        </div>
+    </div>
+
+    <footer class="dashboard-footer">
+        Human × AI Finance Conference — UCLA Anderson
+    </footer>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>
