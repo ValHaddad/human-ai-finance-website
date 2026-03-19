@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-03-19T05:21:16+00:00",
+  "generated_at": "2026-03-19T07:13:16+00:00",
   "submission_deadline": "2026-03-18",
-  "total_submissions": 141,
+  "total_submissions": 150,
   "total_coauthor_responses": 1,
   "submissions_by_date": [
     {
@@ -46,57 +46,57 @@
     },
     {
       "date": "2026-03-19",
-      "count": 22
+      "count": 31
     }
   ],
   "field_distribution": {
-    "Finance": 105,
+    "Finance": 112,
     "Statistics / Data Science": 9,
-    "Economics": 13,
+    "Economics": 15,
     "other": 9,
     "Computer Science": 3,
     "Accounting": 2
   },
   "programming_proficiency": {
-    "2": 21,
-    "3": 80,
+    "2": 22,
+    "3": 88,
     "4": 30,
     "1": 3,
     "5": 7
   },
   "paper_writing_experience": {
     "5": 12,
-    "4": 52,
+    "4": 54,
     "1": 11,
-    "3": 37,
+    "3": 44,
     "2": 29
   },
   "ai_experience_duration": {
-    "2yr+": 64,
+    "2yr+": 71,
     "3-6mo": 12,
     "6-12mo": 30,
-    "1-2yr": 26,
+    "1-2yr": 28,
     "none": 1,
     "<3mo": 8
   },
   "num_coauthors_distribution": {
-    "2": 26,
-    "1": 101,
+    "2": 27,
+    "1": 109,
     "3": 7,
     "4": 4,
     "6": 2,
     "5": 1
   },
   "ai_tools": {
-    "Claude Code": 41,
-    "Claude": 27,
+    "Claude Code": 48,
+    "Claude": 28,
     "Gemini": 17,
-    "Chatgpt": 14,
-    "Chatgpt-4O": 8,
+    "Chatgpt": 15,
+    "Chatgpt-4O": 9,
     "Cc 4.6": 8,
+    "Codex": 7,
     "Refine.Ink": 7,
     "Grok": 6,
-    "Codex": 6,
     "Gpt 5.4": 6,
     "Claude Opus 4.6": 5,
     "Perplexity": 5,
@@ -104,11 +104,12 @@
     "Chatgpt 5.4": 4,
     "Copilot": 4,
     "Chatgpt-5.4": 4,
+    "Cursor": 4,
     "Chatgpt-5.2": 3,
     "Gemini-3": 3,
     "Chatgpt 5.2": 3,
     "Chatgpt-4O, Grok, Manus": 3,
-    "Cursor": 3,
+    "Gemini Cli": 3,
     "Claude-Opus": 2,
     "Supergrok": 2,
     "Notebook Lm": 2,
@@ -116,13 +117,13 @@
     "Claude Sonnet 4.6": 2,
     "Claude Cowork": 2,
     "Opus 4.6": 2,
-    "Gemini Cli": 2,
     "Prism": 2,
     "Claude And Chatgpt": 2,
     "Gemini Pro": 2,
     "Google Gemini": 2,
     "Chatgpt 5.4 Pro": 2,
     "Kimi 2.5": 2,
+    "Cursor Ai": 2,
     "Chatgpt5.2": 1,
     "Claude Web": 1,
     "Chatgpt Web": 1,
@@ -185,7 +186,6 @@
     "Chatgpt (Most Recent Verions)": 1,
     "Claude Code Opus 4.6": 1,
     "Codex Gpt-5.4": 1,
-    "Cursor Ai": 1,
     "Cloud Sonnet": 1,
     "Semantic Search/Knowledge Base": 1,
     "Deepseek": 1,
@@ -213,106 +213,109 @@
     "Openai Codex": 1,
     "Chatgpt-5.3, Calude": 1,
     "Openclaw": 1,
-    "Claudecode": 1
+    "Claudecode": 1,
+    "Qwen3-30B-A3B-Thinking-2507 With Api Access": 1,
+    "Open Ai Gpt 5.2": 1,
+    "Edison Scientific": 1
   },
   "tool_reliance_distribution": {
-    "5": 103,
-    "3": 70,
-    "2": 40,
+    "5": 107,
+    "3": 75,
+    "2": 43,
     "1": 24,
-    "4": 59
+    "4": 63
   },
   "ai_role_by_task": {
     "main_idea": {
-      "primary": 41,
-      "tool": 33,
-      "thought_partner": 24,
-      "not_relevant": 28,
+      "primary": 44,
+      "tool": 36,
+      "thought_partner": 26,
+      "not_relevant": 29,
       "assistant": 11,
       "editor": 3
     },
     "lit_review": {
-      "primary": 75,
-      "assistant": 21,
-      "editor": 11,
-      "tool": 14,
+      "primary": 81,
+      "assistant": 22,
+      "editor": 12,
+      "tool": 15,
       "thought_partner": 19,
       "not_relevant": 1
     },
     "data_collection": {
-      "primary": 70,
-      "tool": 15,
-      "not_relevant": 22,
+      "primary": 75,
+      "tool": 16,
+      "not_relevant": 23,
       "editor": 7,
-      "assistant": 12,
+      "assistant": 14,
       "thought_partner": 15
     },
     "data_analysis": {
-      "primary": 79,
+      "primary": 86,
       "tool": 6,
-      "assistant": 15,
+      "assistant": 16,
       "not_relevant": 13,
       "editor": 12,
-      "thought_partner": 16
+      "thought_partner": 17
     },
     "theorem_proofs": {
-      "primary": 61,
-      "not_relevant": 31,
-      "thought_partner": 19,
+      "primary": 66,
+      "not_relevant": 34,
+      "thought_partner": 20,
       "assistant": 10,
       "editor": 13,
       "tool": 7
     },
     "numerical_sim": {
-      "primary": 79,
-      "not_relevant": 22,
+      "primary": 83,
+      "not_relevant": 24,
       "assistant": 14,
       "editor": 11,
-      "thought_partner": 9,
-      "tool": 4
+      "thought_partner": 10,
+      "tool": 6
     },
     "writing_editing": {
-      "primary": 91,
+      "primary": 98,
       "thought_partner": 23,
       "tool": 9,
       "editor": 11,
-      "assistant": 7
+      "assistant": 9
     }
   },
   "hours": {
     "personal": {
-      "<10": 57,
-      "60-80": 7,
-      "10-20": 29,
+      "<10": 62,
+      "60-80": 8,
+      "10-20": 31,
       "40-60": 16,
       "20-40": 21,
-      "80+": 11
+      "80+": 12
     },
     "team": {
-      "<10": 54,
+      "<10": 59,
       "320+": 3,
-      "10-40": 39,
+      "10-40": 41,
       "40-80": 26,
-      "80-160": 11,
-      "160-320": 8
+      "80-160": 12,
+      "160-320": 9
     },
     "counterfactual": {
-      "8x+": 64,
-      "not_possible": 32,
-      "2-4x": 18,
-      "4-8x": 25,
-      "up_to_2x": 1,
+      "8x+": 69,
+      "not_possible": 33,
+      "2-4x": 19,
+      "4-8x": 26,
+      "up_to_2x": 2,
       "less": 1
     }
   },
   "ai_coordination_distribution": {
     "one_led": 11,
     "independent": 14,
-    "joint": 9,
+    "joint": 10,
     "mixed": 6
   },
   "ai_role_distribution": {
-    "primary_user": 24,
+    "primary_user": 25,
     "independent": 8,
     "reviewer": 7,
     "other": 1
@@ -320,25 +323,25 @@
   "self_evaluation_means": {
     "conceptual_innovation": 5.07,
     "methodological_originality": 4.52,
-    "relevance": 5.48,
-    "rigor": 5.03,
+    "relevance": 5.5,
+    "rigor": 5.02,
     "overall": 5.13
   },
-  "satisfaction_mean": 5.56,
-  "future_ai_likelihood_mean": 6.3,
-  "ai_review_influence_mean": 4.4,
+  "satisfaction_mean": 5.53,
+  "future_ai_likelihood_mean": 6.32,
+  "ai_review_influence_mean": 4.36,
   "satisfaction_distribution": {
-    "7": 33,
-    "5": 26,
+    "7": 34,
+    "5": 33,
     "6": 58,
     "4": 13,
     "1": 4,
     "2": 2,
-    "3": 5
+    "3": 6
   },
   "future_ai_likelihood_distribution": {
-    "7": 92,
-    "3": 2,
+    "7": 100,
+    "3": 3,
     "6": 30,
     "4": 5,
     "5": 6,
@@ -347,12 +350,12 @@
   },
   "ai_review_influence_distribution": {
     "7": 40,
-    "1": 35,
-    "6": 27,
-    "5": 11,
-    "3": 8,
-    "2": 8,
-    "4": 12
+    "1": 36,
+    "6": 29,
+    "5": 12,
+    "3": 10,
+    "2": 9,
+    "4": 14
   },
   "papers": [
     {
@@ -1887,6 +1890,91 @@
           "affiliation": "Professor"
         }
       ]
+    },
+    {
+      "title": "Exogenous Shot: Ozempic Effect on Snack Producers",
+      "authors": [
+        {
+          "name": "Yuri Tserlukevich",
+          "affiliation": "ASU"
+        }
+      ]
+    },
+    {
+      "title": "Trading on Innovation: The Simple Rule of Productivity News",
+      "authors": [
+        {
+          "name": "Vito Cormun",
+          "affiliation": "Santa Clara University"
+        },
+        {
+          "name": "Emile Marin",
+          "affiliation": "University of California, Davis"
+        }
+      ]
+    },
+    {
+      "title": "LLM-Style Text Aversion and Stock Price Reactions: Evidence from Chinese Listed Firms",
+      "authors": [
+        {
+          "name": "Thomas Zhang",
+          "affiliation": "Fudan University"
+        }
+      ]
+    },
+    {
+      "title": "When Does Oil Hedge Inflation? Evidence Across Regimes, Horizons, and Market Structures",
+      "authors": [
+        {
+          "name": "Dakshita Srinivasan",
+          "affiliation": "UCLA Alumni"
+        }
+      ]
+    },
+    {
+      "title": "Threshold Invariance: Why Covenant Tightness Does Not Protect LPs in Private Credit",
+      "authors": [
+        {
+          "name": "Alejandro Lopez-Lira",
+          "affiliation": "University of Florida"
+        }
+      ]
+    },
+    {
+      "title": "When Does a High Sharpe Ratio Imply a Risk Premium?",
+      "authors": [
+        {
+          "name": "Alejandro Lopez-Lira",
+          "affiliation": "University of Florida"
+        }
+      ]
+    },
+    {
+      "title": " Organizational Boundaries and Price Discovery in Private Credit ",
+      "authors": [
+        {
+          "name": "Huasheng Nie",
+          "affiliation": "UCLA"
+        }
+      ]
+    },
+    {
+      "title": "Does Factor Momentum Subsume Stock Momentum?",
+      "authors": [
+        {
+          "name": "Alejandro Lopez-Lira",
+          "affiliation": "University of Florida"
+        }
+      ]
+    },
+    {
+      "title": "The Correlation Cascade: Optimal Evaluation Design When AI Pipelines Self-Assess",
+      "authors": [
+        {
+          "name": "Alejandro Lopez-Lira",
+          "affiliation": "University of Florida"
+        }
+      ]
     }
   ],
   "task_labels": {
@@ -1907,20 +1995,20 @@
     "editor": "Editor"
   },
   "ai_tools_avg_usage": {
-    "Claude": 4.16,
+    "Claude": 4.08,
     "Chatgpt-5.2": 3.67,
     "Gemini-3": 3.0,
     "Grok": 2.0,
     "Claude-Opus": 5.0,
     "Chatgpt5.2": 3.0,
     "Supergrok": 3.0,
-    "Claude Code": 4.6,
-    "Codex": 3.33,
+    "Claude Code": 4.61,
+    "Codex": 3.29,
     "Gemini": 2.82,
     "Claude Web": 1.0,
     "Chatgpt Web": 2.0,
     "Planyourscience.Com": 3.0,
-    "Chatgpt-4O": 3.62,
+    "Chatgpt-4O": 3.67,
     "Codex Gpt 5.4.": 5.0,
     "Chatgpt 5.3. Thinking": 4.0,
     "Chatgpt 5.4": 4.25,
@@ -1933,7 +2021,7 @@
     "Chatgpt-5.2 Thinking": 5.0,
     "Chatgpt4O": 3.0,
     "Anthropic (4.6 Sonnet)": 5.0,
-    "Chatgpt": 3.36,
+    "Chatgpt": 3.27,
     "Claude Opus 4.6": 4.8,
     "Claude Haiku 4.5": 5.0,
     "Refine.Ink": 2.71,
@@ -1959,14 +2047,14 @@
     "Gemini Pro 3.1": 1.0,
     "Chatgpt 5.3": 1.0,
     "Chatgpt-4O, Grok, Manus": 3.0,
-    "Gemini Cli": 5.0,
+    "Gemini Cli": 4.33,
     "Notebooklm": 3.0,
     "Perplexity": 3.0,
     "Antigravity": 3.2,
     "Prism": 4.5,
     "Anthropic": 4.0,
     "Gemini Deep Research": 3.0,
-    "Cursor": 3.67,
+    "Cursor": 3.5,
     "Opus-4.6": 4.0,
     "Claude And Chatgpt": 5.0,
     "Chatgpt Gemini": 4.0,
@@ -2002,7 +2090,7 @@
     "Chatgpt (Most Recent Verions)": 4.0,
     "Claude Code Opus 4.6": 5.0,
     "Codex Gpt-5.4": 2.0,
-    "Cursor Ai": 5.0,
+    "Cursor Ai": 3.5,
     "Cc 4.6": 5.0,
     "Gpt 5.4": 3.4,
     "Cloud Sonnet": 3.0,
@@ -2032,15 +2120,18 @@
     "Openai Codex": 3.0,
     "Chatgpt-5.3, Calude": 3.0,
     "Openclaw": 5.0,
-    "Claudecode": 4.0
+    "Claudecode": 4.0,
+    "Qwen3-30B-A3B-Thinking-2507 With Api Access": 4.0,
+    "Open Ai Gpt 5.2": 3.0,
+    "Edison Scientific": 3.0
   },
   "self_evaluation_by_field": {
     "Finance": {
       "conceptual_innovation": 4.96,
       "methodological_originality": 4.39,
-      "relevance": 5.45,
-      "rigor": 4.86,
-      "overall": 5.06
+      "relevance": 5.46,
+      "rigor": 4.85,
+      "overall": 5.05
     },
     "Statistics / Data Science": {
       "methodological_originality": 5.44,
@@ -2050,11 +2141,11 @@
       "overall": 5.89
     },
     "Economics": {
-      "conceptual_innovation": 5.46,
-      "methodological_originality": 4.69,
-      "relevance": 5.85,
-      "rigor": 5.85,
-      "overall": 5.15
+      "conceptual_innovation": 5.53,
+      "methodological_originality": 4.67,
+      "relevance": 5.93,
+      "rigor": 5.8,
+      "overall": 5.27
     },
     "other": {
       "conceptual_innovation": 4.78,
@@ -2080,11 +2171,11 @@
   },
   "self_evaluation_by_ai_role": {
     "primary_user": {
-      "conceptual_innovation": 5.25,
-      "methodological_originality": 5.25,
-      "relevance": 5.96,
+      "conceptual_innovation": 5.32,
+      "methodological_originality": 5.24,
+      "relevance": 6.0,
       "rigor": 5.92,
-      "overall": 5.75
+      "overall": 5.8
     },
     "independent": {
       "conceptual_innovation": 5.38,
@@ -2109,9 +2200,9 @@
     }
   },
   "satisfaction_by_field": {
-    "Finance": 5.57,
+    "Finance": 5.54,
     "Statistics / Data Science": 6.44,
-    "Economics": 5.15,
+    "Economics": 5.13,
     "other": 5.0,
     "Computer Science": 5.67,
     "Accounting": 6.0
@@ -2119,32 +2210,33 @@
   "future_ai_likelihood_by_field": {
     "Finance": 6.38,
     "Statistics / Data Science": 5.89,
-    "Economics": 6.15,
+    "Economics": 6.27,
     "other": 5.78,
     "Computer Science": 7.0,
     "Accounting": 6.5
   },
   "ai_review_influence_by_field": {
-    "Finance": 4.36,
+    "Finance": 4.32,
     "Statistics / Data Science": 4.44,
-    "Economics": 4.38,
+    "Economics": 4.33,
     "other": 4.11,
     "Computer Science": 5.67,
     "Accounting": 5.5
   },
   "reliance_by_proficiency": {
-    "2": 3.55,
-    "3": 3.61,
+    "2": 3.47,
+    "3": 3.64,
     "4": 3.63,
     "1": 4.5,
     "5": 3.21
   },
   "counterfactual_by_experience": {
     "2yr+": {
-      "8x+": 28,
-      "not_possible": 18,
-      "4-8x": 10,
-      "2-4x": 8
+      "8x+": 32,
+      "not_possible": 19,
+      "4-8x": 11,
+      "2-4x": 8,
+      "up_to_2x": 1
     },
     "3-6mo": {
       "not_possible": 4,
@@ -2159,10 +2251,10 @@
       "not_possible": 3
     },
     "1-2yr": {
-      "8x+": 9,
+      "8x+": 10,
       "4-8x": 6,
       "not_possible": 5,
-      "2-4x": 4,
+      "2-4x": 5,
       "up_to_2x": 1,
       "less": 1
     },
@@ -2177,11 +2269,11 @@
   },
   "self_evaluation_by_writing_exp": {
     "Senior (4\u20135)": {
-      "conceptual_innovation": 4.97,
+      "conceptual_innovation": 5.03,
       "methodological_originality": 4.44,
       "relevance": 5.52,
       "rigor": 5.05,
-      "overall": 5.16
+      "overall": 5.17
     },
     "Junior (1\u20132)": {
       "conceptual_innovation": 4.92,
@@ -2191,35 +2283,35 @@
       "overall": 4.8
     },
     "Mid-Career (3)": {
-      "methodological_originality": 4.86,
-      "conceptual_innovation": 5.41,
-      "relevance": 5.73,
-      "rigor": 5.49,
-      "overall": 5.43
+      "methodological_originality": 4.8,
+      "conceptual_innovation": 5.27,
+      "relevance": 5.75,
+      "rigor": 5.39,
+      "overall": 5.39
     }
   },
   "satisfaction_by_writing_exp": {
-    "Senior (4\u20135)": 5.25,
+    "Senior (4\u20135)": 5.21,
     "Junior (1\u20132)": 5.97,
-    "Mid-Career (3)": 5.65
+    "Mid-Career (3)": 5.59
   },
   "future_ai_likelihood_by_writing_exp": {
-    "Senior (4\u20135)": 6.28,
+    "Senior (4\u20135)": 6.24,
     "Junior (1\u20132)": 6.62,
-    "Mid-Career (3)": 6.0
+    "Mid-Career (3)": 6.16
   },
   "ai_review_influence_by_writing_exp": {
-    "Senior (4\u20135)": 3.45,
+    "Senior (4\u20135)": 3.42,
     "Junior (1\u20132)": 6.0,
-    "Mid-Career (3)": 4.3
+    "Mid-Career (3)": 4.27
   },
   "self_evaluation_by_ai_exp": {
     "Veteran (2+ yr)": {
-      "conceptual_innovation": 5.03,
-      "methodological_originality": 4.81,
-      "relevance": 5.44,
-      "rigor": 5.23,
-      "overall": 5.33
+      "conceptual_innovation": 4.99,
+      "methodological_originality": 4.77,
+      "relevance": 5.48,
+      "rigor": 5.2,
+      "overall": 5.31
     },
     "New (<6 mo)": {
       "methodological_originality": 3.81,
@@ -2229,26 +2321,26 @@
       "overall": 4.29
     },
     "Moderate (6 mo\u20132 yr)": {
-      "conceptual_innovation": 5.27,
-      "methodological_originality": 4.46,
-      "relevance": 5.7,
+      "conceptual_innovation": 5.33,
+      "methodological_originality": 4.47,
+      "relevance": 5.69,
       "rigor": 5.02,
-      "overall": 5.21
+      "overall": 5.22
     }
   },
   "satisfaction_by_ai_exp": {
-    "Veteran (2+ yr)": 5.62,
+    "Veteran (2+ yr)": 5.59,
     "New (<6 mo)": 4.48,
-    "Moderate (6 mo\u20132 yr)": 5.89
+    "Moderate (6 mo\u20132 yr)": 5.83
   },
   "future_ai_likelihood_by_ai_exp": {
-    "Veteran (2+ yr)": 6.59,
+    "Veteran (2+ yr)": 6.63,
     "New (<6 mo)": 5.57,
-    "Moderate (6 mo\u20132 yr)": 6.25
+    "Moderate (6 mo\u20132 yr)": 6.21
   },
   "ai_review_influence_by_ai_exp": {
-    "Veteran (2+ yr)": 3.84,
+    "Veteran (2+ yr)": 3.87,
     "New (<6 mo)": 4.1,
-    "Moderate (6 mo\u20132 yr)": 5.14
+    "Moderate (6 mo\u20132 yr)": 5.05
   }
 }
