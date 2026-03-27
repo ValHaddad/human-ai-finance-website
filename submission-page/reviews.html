@@ -362,7 +362,7 @@ const SCALE_ANCHORS_HTML = `
 
 
 // ─── 0. Consent + Identification ─────────────────────────
-// Data keys: consent_agree, reviewer_id, paper_id
+// Data keys: consent_agree, reviewer_name, reviewer_id, paper_id
 
 const intro = {
   type: jsPsychSurvey,
@@ -380,11 +380,10 @@ const intro = {
                 '<h1>Paper Review</h1>' +
                 '<h2>Human \u00d7 AI Finance 2026 \u2014 UCLA Anderson School of Management</h2>' +
               '</div>' +
-              '<p>Thank you for participating in our reviewer benchmarking exercise. ' +
-                'You will rate <strong>one paper per submission</strong>. Each review should take ' +
-                'approximately <strong>2 minutes</strong>. Please reload this page to review each additional paper.</p>' +
-              '<p>You will rate the paper on five dimensions using a 1\u201310 scale. ' +
-                'Your ratings will be used for academic research purposes only.</p>' +
+              '<p>Thank you for serving on the scientific committee for the ' +
+                'Human \u00d7 AI Finance Conference at UCLA Anderson. Your reviews are an essential part of ' +
+                'evaluating the conference\u2019s paper selection process. ' +
+                'Please submit <strong>one response per paper</strong>.</p>' +
               '<p style="margin-top:12px;">By continuing, you agree that your anonymized ratings ' +
                 'may be used for academic research on AI-assisted writing evaluation.</p>' +
               '<p>You may withdraw at any time by emailing ' +
@@ -401,6 +400,11 @@ const intro = {
             "I agree to the terms above."
           ],
           validators: [{ type: "answercount", minCount: 1, text: "You must agree to continue." }]
+        },
+        {
+          type: "text", name: "reviewer_name",
+          title: "Your Name",
+          isRequired: true
         },
         {
           type: "text", name: "reviewer_id",
