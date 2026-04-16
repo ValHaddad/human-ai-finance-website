@@ -302,6 +302,11 @@ section h3 {
     font-style: italic;
 }
 
+.agenda-closing {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
 @media (max-width: 768px) {
     .agenda-session-header {
         padding-left: 0;
